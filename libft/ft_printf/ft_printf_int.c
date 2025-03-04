@@ -1,36 +1,42 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   printf_str.c                                       :+:      :+:    :+:   */
+/*   printf_int.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/06 15:47:51 by albetanc          #+#    #+#             */
-/*   Updated: 2024/12/17 11:00:22 by albetanc         ###   ########.fr       */
+/*   Created: 2024/12/09 16:42:32 by albetanc          #+#    #+#             */
+/*   Updated: 2024/12/17 17:32:14 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-static int	safe_putstr(char *s)
+static int	count_dig(int n)
 {
-	if (write(1, s, ft_strlen(s)) == -1)
-		return (-1);
-	return (1);
+	int	len;
+	int	tmp;
+
+	len = 0;
+	tmp = n;
+	if (n == 0)
+		len = 1;
+	if (n < 0)
+		len++;
+	while (tmp)
+	{
+		len++;
+		tmp /= 10;
+	}
+	return (len);
 }
 
-int	printf_str(char *s)
+int	ft_printf_int(int n)
 {
-	size_t			len;
+	int	len;
 
-	if (!s)
-	{
-		if (safe_putstr("(null)") == -1)
-			return (-1);
-		return (6);
-	}
-	len = ft_strlen(s);
-	if (safe_putstr(s) == -1)
+	len = count_dig(n);
+	if (ft_putnbr_fd_sig(n, 1) == -1)
 		return (-1);
 	return (len);
 }

@@ -18,17 +18,17 @@ static int	id_type(const char *input, va_list args)
 
 	i = 0;
 	if (*input == 'c')
-		i += printf_char((char)va_arg(args, int));
+		i += ft_printf_char((char)va_arg(args, int));
 	else if (*input == 's')
-		i += printf_str(va_arg(args, char *));
+		i += ft_printf_str(va_arg(args, char *));
 	else if (*input == 'p')
-		i += printf_ptr(va_arg(args, unsigned long long));
+		i += ft_printf_ptr(va_arg(args, unsigned long long));
 	else if (*input == 'd' || *input == 'i')
-		i += printf_int(va_arg(args, int));
+		i += ft_printf_int(va_arg(args, int));
 	else if (*input == 'u')
-		i += printf_unsign(va_arg(args, unsigned int));
+		i += ft_printf_unsign(va_arg(args, unsigned int));
 	else if (*input == 'x' || *input == 'X')
-		i += printf_hexa(va_arg(args, unsigned int), *input);
+		i += ft_printf_hexa(va_arg(args, unsigned int), *input);
 	return (i);
 }
 
@@ -49,12 +49,12 @@ int	ft_printf(const char *input, ...)
 			if (ft_strchr("cspdiuxX", *input))
 				i += id_type(input, args);
 			else if (*input == '%')
-				i += printf_char('%');
+				i += ft_printf_char('%');
 			else
 				return (va_end(args), -1);
 		}
 		else
-			i = i + printf_char(*input);
+			i = i + ft_printf_char(*input);
 		input++;
 	}
 	va_end(args);

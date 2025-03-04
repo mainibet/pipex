@@ -15,14 +15,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <string.h>
-# include <stdlib.h>
 # include <stdint.h>
-
-typedef struct s_list
-{
-	void			*content;
-	struct s_list	*next;
-}	t_list;
+# include <stdarg.h> 
 
 int		ft_isalpha(int c);
 int		ft_isdigit(int c);
@@ -62,5 +56,6 @@ int		ft_putnbr_fd_un(unsigned long n, int fd);
 void	ft_putnbr_base_sig(long long n, char *base);
 int		ft_putnbr_base_un(unsigned long n, char *base);
 int		safe_write(int fd, const void *buf, size_t count);
+int		ft_printf(const char *input, ...);
 
 #endif

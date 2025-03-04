@@ -1,43 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   printf_unsign.c                                    :+:      :+:    :+:   */
+/*   printf_char.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/06 15:49:27 by albetanc          #+#    #+#             */
-/*   Updated: 2024/12/18 11:24:25 by albetanc         ###   ########.fr       */
+/*   Created: 2024/12/06 15:47:16 by albetanc          #+#    #+#             */
+/*   Updated: 2024/12/17 10:42:28 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-static int	count_dig(unsigned int n)
+static int	safe_putchar(char c, int fd)
 {
-	int	len;
-
-	len = 0;
-	if (n == 0)
-		return (1);
-	while (n)
-	{
-		n /= 10;
-		len++;
-	}
-	return (len);
+	if (write (fd, &c, 1) == -1)
+		return (-1);
+	return (1);
 }
 
-int	printf_unsign(unsigned int n)
+int	ft_printf_char(char c)
 {
-	int	len;
-
-	if (n == 0)
-	{
-		if (safe_write(1, "0", 1) == -1)
-			return (-1);
-	}
-	else
-		ft_putnbr_fd_un(n, 1);
-	len = count_dig(n);
-	return (len);
+	if (safe_putchar(c, 1) == -1)
+		return (-1);
+	return (1);
 }

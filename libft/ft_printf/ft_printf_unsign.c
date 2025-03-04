@@ -1,26 +1,43 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printf.h                                        :+:      :+:    :+:   */
+/*   printf_unsign.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/06 14:41:36 by albetanc          #+#    #+#             */
-/*   Updated: 2024/12/16 14:34:50 by albetanc         ###   ########.fr       */
+/*   Created: 2024/12/06 15:49:27 by albetanc          #+#    #+#             */
+/*   Updated: 2024/12/18 11:24:25 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FT_PRINTF_H
-# define FT_PRINTF_H
-# include <stdarg.h>
-# include "./libft/libft.h"
+#include "ft_printf.h"
 
-int	ft_printf(const char *format, ...);
-int	printf_char(char c);
-int	printf_str(char *s);
-int	printf_int(int n);
-int	printf_hexa(unsigned int n, char input);
-int	printf_ptr(unsigned long long p);
-int	printf_unsign(unsigned int n);
+static int	count_dig(unsigned int n)
+{
+	int	len;
 
-#endif
+	len = 0;
+	if (n == 0)
+		return (1);
+	while (n)
+	{
+		n /= 10;
+		len++;
+	}
+	return (len);
+}
+
+int	ft_printf_unsign(unsigned int n)
+{
+	int	len;
+
+	if (n == 0)
+	{
+		if (safe_write(1, "0", 1) == -1)
+			return (-1);
+	}
+	else
+		ft_putnbr_fd_un(n, 1);
+	len = count_dig(n);
+	return (len);
+}

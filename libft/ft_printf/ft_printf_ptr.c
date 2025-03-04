@@ -1,42 +1,49 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   printf_int.c                                       :+:      :+:    :+:   */
+/*   printf_ptr.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/09 16:42:32 by albetanc          #+#    #+#             */
-/*   Updated: 2024/12/17 17:32:14 by albetanc         ###   ########.fr       */
+/*   Created: 2024/12/06 15:48:05 by albetanc          #+#    #+#             */
+/*   Updated: 2024/12/18 11:23:47 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-static int	count_dig(int n)
+static int	count_dig(unsigned long long n)
 {
-	int	len;
-	int	tmp;
+	int				len;
 
 	len = 0;
-	tmp = n;
 	if (n == 0)
-		len = 1;
-	if (n < 0)
-		len++;
-	while (tmp)
+		return (1);
+	while (n > 0)
 	{
 		len++;
-		tmp /= 10;
+		n /= 16;
 	}
 	return (len);
 }
 
-int	printf_int(int n)
+int	ft_printf_ptr(unsigned long long add)
 {
-	int	len;
+	char	*pref;
+	char	*base;
+	int		len;
 
-	len = count_dig(n);
-	if (ft_putnbr_fd_sig(n, 1) == -1)
+	pref = "0x";
+	base = "0123456789abcdef";
+	if (!add)
+	{
+		if (safe_write(1, "(nil)", 5) == -1)
+			return (-1);
+		return (5);
+	}
+	if (safe_write(1, pref, ft_strlen(pref)) == -1)
 		return (-1);
-	return (len);
+	ft_putnbr_base_un(add, base);
+	len = count_dig(add);
+	return (len + 2);
 }

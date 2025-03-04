@@ -1,25 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   printf_ptr.c                                       :+:      :+:    :+:   */
+/*   printf_hexa.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/06 15:48:05 by albetanc          #+#    #+#             */
-/*   Updated: 2024/12/18 11:23:47 by albetanc         ###   ########.fr       */
+/*   Created: 2024/12/06 15:49:49 by albetanc          #+#    #+#             */
+/*   Updated: 2024/12/17 13:28:24 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-static int	count_dig(unsigned long long n)
+static char	*select_base(char input)
 {
-	int				len;
+	if (input == 'x')
+		return ("0123456789abcdef");
+	else if (input == 'X')
+		return ("0123456789ABCDEF");
+	else
+		return (NULL);
+}
+
+static int	count_dig(unsigned int n)
+{
+	int	len;
 
 	len = 0;
 	if (n == 0)
 		return (1);
-	while (n > 0)
+	while (n)
 	{
 		len++;
 		n /= 16;
@@ -27,23 +37,15 @@ static int	count_dig(unsigned long long n)
 	return (len);
 }
 
-int	printf_ptr(unsigned long long add)
+int	ft_printf_hexa(unsigned int n, char input)
 {
-	char	*pref;
 	char	*base;
 	int		len;
 
-	pref = "0x";
-	base = "0123456789abcdef";
-	if (!add)
-	{
-		if (safe_write(1, "(nil)", 5) == -1)
-			return (-1);
-		return (5);
-	}
-	if (safe_write(1, pref, ft_strlen(pref)) == -1)
+	base = select_base(input);
+	if (!base)
 		return (-1);
-	ft_putnbr_base_un(add, base);
-	len = count_dig(add);
-	return (len + 2);
+	len = count_dig(n);
+	ft_putnbr_base_un(n, base);
+	return (len);
 }
