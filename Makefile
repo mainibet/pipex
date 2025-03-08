@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/03/05 12:51:52 by albetanc          #+#    #+#              #
+#    Updated: 2025/03/05 12:52:55 by albetanc         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 CC = cc
 
 CFLAGS = -Wall -Wextra -Werror
@@ -7,7 +19,8 @@ LIBFT_LIB = $(LIBFT_DIR)/libft.a
 
 NAME = pipex
 
-SRC =  main.c
+# SRC =  main.c # this is for testing libft and ft_printf
+SRC = pipex.c # this is for my development
 
 OBJ = $(SRC:.c=.o)
 
