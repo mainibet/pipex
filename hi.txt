@@ -1,1 +1,1 @@
-hi
+This is what is inside file1 called hi.txt

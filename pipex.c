@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/10 11:39:20 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/10 14:15:19 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
-//just for etsting:
+//just for testing this include:
 #include <stdio.h>
 
 //To find executables cmd1 or cmd2
@@ -97,14 +97,25 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
-/*
-int	cmd1_execution(const char *path_env, char **cmd1, char **const evnp[])
+
+#include <stdio.h> //just for testing
+
+int	execution(char **argv, char **const envp)
 {
-	//path?
-		
-	//int execve(const char *pathname, char *const argv[], char *const envp[]);
+	char	*cmd1_path;
+//find the path of the cmd
+	cmd1_path = find_path(argv[2], envp); //make it later for cmd2
+	printf("Execution will begin");//testing
+	//try to execute cmd
+	if (execve(cmd1_path, argv, envp) == -1)
+	{
+		perror ("execve failed");//before the next step I have to check free that are needed from finding the path
+		free (cmd1_path);
+		exit (EXIT_FAILURE);
+	}
+	return (0);	
 }
-*/
+
 #include <stdio.h> //just for testing
 //initial checking: if file1 exist, if file1 has read permissions, if cmd1 is executable
 int	ini_check(char **argv, char **envp)
@@ -149,11 +160,14 @@ int	main(int argc, char **argv, char **envp)
 			return (1);
 		}
 		//code to read the file if open() success
-		if (close(file1) == -1)
-		{
-			perror("Error closing the file");
-			return (1);
-		}
+		if (argv[2])//temporal for mvp with cmd1
+			execution(argv, envp);	
+//temporary compented close() while i create the fork
+//		if (close(file1) == -1)
+//		{
+//			perror("Error closing the file");
+//			return (1);
+//		}
 	}
 	return (0);
 }
