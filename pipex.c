@@ -6,13 +6,14 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/08 13:35:41 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/10 10:17:52 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
 //needed as a parameter of execve
+
 char	*get_path_env(char **envp)
 {
 	int	i;
@@ -26,9 +27,10 @@ char	*get_path_env(char **envp)
 	}
 	return (NULL);//if is not found
 }
-/*
+
+
 //get_path_testing
-#include <stdio.h>
+/*#include <stdio.h>
 int	main(int argc, char **argv, char **envp)
 {
 	(void) argc;
@@ -43,7 +45,6 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
-
 //To find the file path rather file1, file2, cmd1 or cmd2
 char	*find_path(char *argv, char **envp)
 {
@@ -74,6 +75,7 @@ char	*find_path(char *argv, char **envp)
 	return (NULL);
 }
 
+//find_path specific for files testing
 #include <stdio.h>
 int	main(int argc, char **argv, char **envp)
 {
