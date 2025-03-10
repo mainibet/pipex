@@ -6,13 +6,13 @@
 #    By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/05 12:51:52 by albetanc          #+#    #+#              #
-#    Updated: 2025/03/05 12:52:55 by albetanc         ###   ########.fr        #
+#    Updated: 2025/03/10 11:28:19 by albetanc         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 LIBFT_DIR = ./libft
 LIBFT_LIB = $(LIBFT_DIR)/libft.a

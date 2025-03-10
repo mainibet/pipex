@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/10 10:17:52 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/10 11:39:20 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,10 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
-//To find the file path rather file1, file2, cmd1 or cmd2
+//just for etsting:
+#include <stdio.h>
+
+//To find executables cmd1 or cmd2
 char	*find_path(char *argv, char **envp)
 {
 	char	*file_path;//to hold the return
@@ -68,14 +71,17 @@ char	*find_path(char *argv, char **envp)
 		file_path = ft_strjoin(each_path, argv);
 		free (each_path);
 		if (access (file_path, F_OK) == 0)
+		{	//just for testing
+			printf("Path found for cmd1: %s\n", file_path);
 			return (file_path);//free in other place
+		}//for testing
 		free (file_path);
 		i++;
 	}//maybe after this is needed to check memory and free
 	return (NULL);
 }
-
-//find_path specific for files testing
+/*
+//find_path specific for executable files testing cmd1 cmd2
 #include <stdio.h>
 int	main(int argc, char **argv, char **envp)
 {
@@ -90,7 +96,7 @@ int	main(int argc, char **argv, char **envp)
 		printf ("Command path not found\n");
 	return (0);
 }
-
+*/
 /*
 int	cmd1_execution(const char *path_env, char **cmd1, char **const evnp[])
 {
@@ -98,44 +104,44 @@ int	cmd1_execution(const char *path_env, char **cmd1, char **const evnp[])
 		
 	//int execve(const char *pathname, char *const argv[], char *const envp[]);
 }
-
+*/
+#include <stdio.h> //just for testing
 //initial checking: if file1 exist, if file1 has read permissions, if cmd1 is executable
-int	ini_check(char *argv)
+int	ini_check(char **argv, char **envp)
 {
-	char	*path_file1;
-	char	*path_cmd1;
-//poner aca la ruta de archivos
-	path_file1 = 
-	if (access(argv[1], F_OK) == -1)//to check if the file exist
+	//in this first if condition include the check for argv[4] which is file2
+	if (access("hi.txt", F_OK) == -1)//to check if the file exist
 	{
 		perror("Input file doesn't exist");
 		return (1);
 	}
-	else if (access(argv[1], R_OK) == -1)//to check if the file is readable
+	//in this second if condition include the check for argv[4] which is file2
+	else if (access("hi.txt", R_OK) == -1)//to check if the file is readable
 	{
 		perror("Input file is not readable");
 		return (1);
 	}
-	if (access(argv[2], X_OK) == -1)//pending fix parameters, needs to
- be the path
+	//in this final if condition include cmd2 to check if is executable argv[3]
+	if (access(find_path(argv[2], envp), X_OK) == -1)//pending fix parameters, needs to be the path
  	{
 		perror("cmd1 is not executable");
 		return (1);
 	}
+	//for testing
+	printf("File1 and cmd1 passed initial check\n");
+	return (0);
 }
 
-int	main(int argc, char **argv, char *envp)
+int	main(int argc, char **argv, char **envp)
 {
 	int	file1;//to open fd file1
 
 	ft_printf("argc including the program: %d\n", argc);//just for mvp
-	(void) *argv;//temporary just for mvp
 	if (argc != 3)//temporary, just for this mvp
 		return (ft_printf("include 2 args\n"), 1);
 	else
 	{
-		ini_check(argv[1]);
-		ini_check(argv[2]);
+		ini_check(argv, envp);
 		file1 = open("hi.txt", O_RDONLY);//to open file1 in read-only mode
 		if ( file1 == -1)
 		{
@@ -151,4 +157,4 @@ int	main(int argc, char **argv, char *envp)
 	}
 	return (0);
 }
-*/
+
