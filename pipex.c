@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/10 14:15:19 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/10 14:42:15 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,12 +100,18 @@ int	main(int argc, char **argv, char **envp)
 
 #include <stdio.h> //just for testing
 
-int	execution(char **argv, char **const envp)
+int	execution(char* *argv, char **const envp)
 {
 	char	*cmd1_path;
 //find the path of the cmd
 	cmd1_path = find_path(argv[2], envp); //make it later for cmd2
-	printf("Execution will begin");//testing
+	if (cmd1_path == NULL)
+	{
+		perror ("path not found for execution\n");
+		exit (EXIT_FAILURE);
+	}
+	printf("cmd_path found for execution: %s\n", cmd1_path);//just for testing
+	printf("Execution will begin\n");//testing
 	//try to execute cmd
 	if (execve(cmd1_path, argv, envp) == -1)
 	{
