@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/10 14:42:15 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/10 16:16:35 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,30 @@ int	main(int argc, char **argv, char **envp)
 }
 */
 
+#include <stdio.h>//just for testing
+//to redirect input
+int	redir_input(int file1)
+{
+	int	file1_dup;
+
+	file1_dup = dup2(file1, STDIN_FILENO);
+	if (file1_dup == -1)
+	{
+		perror ("Dup2 failed");
+		return (1);
+	}
+	printf("Successfull redirection: now stdin comes from fd file1 %d\n", file1);
+	if (close(file1) == -1)
+	{
+		perror ("Error closing the file");
+		return (1);
+	}
+	return (0);
+}
+
 #include <stdio.h> //just for testing
 
-int	execution(char* *argv, char **const envp)
+int	execution(char	**argv, char **const envp)
 {
 	char	*cmd1_path;
 //find the path of the cmd
@@ -118,7 +139,7 @@ int	execution(char* *argv, char **const envp)
 		perror ("execve failed");//before the next step I have to check free that are needed from finding the path
 		free (cmd1_path);
 		exit (EXIT_FAILURE);
-	}
+	}//pending to free somewhere else cmd1_when success but after execution
 	return (0);	
 }
 
@@ -158,20 +179,32 @@ int	main(int argc, char **argv, char **envp)
 		return (ft_printf("include 2 args\n"), 1);
 	else
 	{
-		ini_check(argv, envp);
+		ini_check(argv, envp);//this will tak all argv to check them
 		file1 = open("hi.txt", O_RDONLY);//to open file1 in read-only mode
 		if ( file1 == -1)
 		{
 			perror ("Error opening file");
 			return (1);
 		}
+		//to redirec fil1 as intput of cmd1
+		if (redir_input(file1))
+		{
+			//if redirection fails, close file1
+			if (close(file1) == -1)
+			{
+				perror("Error closing the file");
+				return (1);
+			}
+		}
 		//code to read the file if open() success
 		if (argv[2])//temporal for mvp with cmd1
 			execution(argv, envp);	
-//temporary compented close() while i create the fork
-//		if (close(file1) == -1)
+		//Need to close file1 when is not longer used
+//This close(file1) was moved after the redirection file1
+//check if this is the position for file1_dup. Temporary comment until fork()
+//		if (close(file1_dup) == -1)
 //		{
-//			perror("Error closing the file");
+//			perror ("Error closing the file");
 //			return (1);
 //		}
 	}
