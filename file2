@@ -1,29 +1,29 @@
-#!/bin/bash
-
-# ANSI color codes
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'  # For the count summary
-NC='\033[0m'      # No Color
-
-# Set your pipex program path
-PIPE_X="./pipex"  # Adjust the path to your pipex program if needed
-
-# Test cases (add more as needed)
-TEST_CASES=(
-    "grep apple"
-    "echo Hello World"
-    "cat"
-    "echo \"New line:\""
-    "head -n 2"
-    "echo \"Number:\""
-    "tail -n 1"
-    "grep test"
-    "cat"
-    "grep apple"
-)
-
-# Initialize pass/fail counters
+Redirection from cmd2 to file2 will beginNow will begin redir_output to file2Successfull redirection: now cmd2 stdout goes to file2 3
+redirection cmd2 file2 goodPath found for cmd1: /usr/bin/ls
+cmd2_path found for execution: /usr/bin/ls
+Execution of cmd2 will begin
+actual_output.txt
+apple.txt
+cmd2_file2_test.txt
+expected_output.txt
+file2
+fulltest_pipex.sh
+hi.txt
+infile.txt
+libft
+main.c
+Makefile
+no_readable.txt
+outfile.txt
+output.txt
+pipex
+pipex.c
+pipex.h
+pipex.o
+pipex.pdf
+testing
+test.txt
+rs
 PASS_COUNT=0
 FAIL_COUNT=0
 
