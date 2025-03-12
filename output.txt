@@ -1,0 +1,5 @@
+argc including the program: 3
+cmd1 is not executable: Bad address
+path not found for execution
+: No such file or directory
+Successfull redirection: now stdin comes from fd file1 3

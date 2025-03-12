@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/11 18:16:18 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/12 14:54:53 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
-//just for testing this include:
 #include <stdio.h>
 
 //To find executables cmd1 or cmd2
@@ -122,7 +121,7 @@ int	redir_input(int file1)
 //function to get the right args for 
 //execve() consider the firs argv the file that needs to be process by the cmd//about it man says:  By convention, the first of these  strings (i.e.,  argv[0])  should  contain the filename associated with the file being executed.
 
-char    **remove_first_argv(int argc, char **argv)
+char    **exec_argv(int argc, char **argv)
 {
     char    **new_arg;
     int i;
@@ -130,15 +129,15 @@ char    **remove_first_argv(int argc, char **argv)
 
     if (argc <= 1)//if there are not enought arg
         return (NULL);
-    new_arg = malloc (sizeof(char *) * argc);//check where will be free if success
+    new_arg = malloc (sizeof(char *) * argc);//check where will be free if success. It will be with malloc to make possible the bonus
     if (!new_arg)
     {
         perror ("malloc failed in remove_first_argv");
         return (NULL);
     }
-    i = 1;//to skip original argv[0] from original args
+    i = 2;//to skip original argv[0] and the argv[1] from original args
     j = 0;//to loop in the new array
-    while (i < argc)
+    while (i < argc)//execve only needs as argv the cmd and command -flags. In a future version needs to loop until argv[arc-1] to skip file2
     {
         new_arg[j] = ft_strdup(argv[i]);//to duplicate each argv original so after need to be freed each one if success
         if (!new_arg[j])
@@ -210,18 +209,19 @@ int	ini_check(char **argv, char **envp)
 	return (0);
 }
 
-int	main(int argc, char **argv, char **envp)
+int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly with 4arg
 {
 	int	file1;//to open fd file1
-	char    **nargv;
+	int file2;
+    char    **nargv;
 
 	ft_printf("argc including the program: %d\n", argc);//just for mvp
-	if (argc != 3)//temporary, just for this mvp
+	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
 		return (ft_printf("include 2 args\n"), 1);
 	else
 	{
 		ini_check(argv, envp);//this will tak all argv to check them
-		file1 = open("hi.txt", O_RDONLY);//to open file1 in read-only mode
+		file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
 		if ( file1 == -1)
 		{
 			perror ("Error opening file");
@@ -238,12 +238,18 @@ int	main(int argc, char **argv, char **envp)
 			}
 		}
 		//code to read the file if open() success
+        file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
+		if ( file2 == -1)
+        {
+            perror ("Error opening file2");
+            return (1);
+        }
 		if (argv[2])//temporal for mvp with cmd1
         	{
             	//need to be found right args before execution
             	//nargv has mallocs to check if succeed after use it
             	nargv = NULL;
-                nargv = remove_first_argv(argc,argv);//will remove original argv[0]
+                nargv = exec_argv(argc,argv);//will remove original argv[0]
 		if (!nargv)
             	{
             		perror ("Failed to remove first argv called from main");
