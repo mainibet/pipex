@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 15:48:16 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 17:23:12 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,6 +295,49 @@ int	ini_check(char **argv, char **envp)
     printf("cmd2 and file2 passed initial check\n");
 	return (0);
 }
+//process for cmd1
+int child1(int  *pipefd, char **cmd1, char **file1, char **envp)
+{
+    close(pipefd[0]);//not needed in this process, but was inherited
+    //to redirec file1 as intput of cmd1
+		if (redir_input(file1))
+		{
+			//if redirection fails, close file1
+			if (close(file1) == -1)
+			{
+				perror("Error closing the file");
+				return (1);
+			}
+		}
+ //redirection cmd1 to pipefd[1] stdout
+        if (redir_output(pipefd[1]))//in the child process before this close pipefd[0];
+        {
+            if (close(pipefd[1]) == -1)
+            {
+                perror ("Error closing pipfd[1]");
+                return (1);
+            }
+        }
+        execution(cmd1, envp);//here the first param is the one calle nargv in the main
+        if (close(pipefd[1] == - 1))
+        {
+            if (close (pipefd[1]))
+            {
+                perror ("Error closing pipefd[1]");
+                return (1);
+            }
+        }
+}
+
+//process for cmd2
+int child2(int *pipefd, char **cmd2)
+{
+    pid_t   pid2;
+    int status2;
+
+    pid2 = fork();
+    close(pipefd[1]); //not needed in this process
+}
 
 int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly with 4arg
 {
@@ -302,6 +345,8 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 	int file2;//to opoen file2
 //    char    **nargv;
     int pipefd[2];//check if norminette is happy with this
+    pid_t   pid1;
+    int status1;
 
 	ft_printf("argc including the program: %d\n", argc);//just for mvp
 	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
@@ -314,6 +359,22 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
         {
             perror("pipe failed");
             exit (EXIT_FAILURE);
+        }
+        //first child
+        pid1 = fork();
+        if (pid1 == 0);
+        {
+            child1(pipefd, argv, NULL, envp);//ojo que debe ser nargv y revisar si ese NULL si se necesita
+            exit (0);
+        }
+        else
+        {
+            child2(pipefd, argv, NULL, envp);//revisar que arg necesita y que recibe
+        }
+        else
+        {
+            waitpid(pid1, &status1, 0);  
+            eaitpid(pid2, &status2, 0);          
         }
 //open file1 and redirection file1 to cmd1
         /*
@@ -354,7 +415,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
                 perror ("Error closing pipefd[0]");
                 return (1);
             }
-        }
+        }//close pipefd after using it
         //code to read the file if open() success and then redirect cmd2 to file2
         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
 		if (file2 == -1)
@@ -374,7 +435,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
                 perror ("Error closing file2 after failed redirection cmd2");
                 return (1);
             }
-        }
+        }//close pipefd after using it
     	if (argv[1])//temporal for mvp with cmd1
         {
             	//need to be found right args before execution
