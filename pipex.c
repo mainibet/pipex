@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 15:35:49 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 15:38:06 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ int	redir_input(int fd)
 		perror ("Dup2 failed stdin file1 to cmd1");
 		return (1);
 	}
-	printf("Successfull redirection: now stdin comes from fd file1 %d\n", file1);
+	printf("Successfull redirection: now stdin comes from fd file1 %d\n", fd);
 	if (close(fd) == -1)
 	{
 		perror ("Error closing the file1 after redirection file1 to cmd1");
@@ -161,7 +161,7 @@ int redir_output(int fd)
         perror ("Dup2 failed with cmd2 to file2");
         return (1);
     }
-    printf("Successfull redirection: now cmd2 stdout goes to file2 %d\n", file2);
+    printf("Successfull redirection: now cmd2 stdout goes to file2 %d\n", fd);
     if (close (fd) == - 1)//close file2 after dup2 in redirection
     {
         perror ("Error closing file2 or pipefd[0] after redirection cmd2 to file2");
@@ -300,7 +300,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 {
 //	int	file1;//to open fd file1
 	int file2;//to opoen file2
-    char    **nargv;
+//    char    **nargv;
     int pipefd[2];//check if norminette is happy with this
 
 	ft_printf("argc including the program: %d\n", argc);//just for mvp
