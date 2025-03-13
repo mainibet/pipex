@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/12 18:01:59 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 12:48:53 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,36 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
+//To get the cmd name in the argv in cases like "echo hello world" or "cat -n" or "ls -l"
+//This will make the function find_path work correctly before the execution and in the initial check
+
+char *get_only_cmd(char *argv)
+{
+    char *space;
+    char *cmd;
+    size_t len;
+
+    space = ft_strchr(argv, ' ');
+    if (space)//if space is not NULL
+    {
+        len = space - argv; //to get the lenth of the command
+        cmd = malloc (sizeof (char) * len + 1); //check if succed where to free
+        if (!cmd)
+        {
+            perror ("Malloc failed to get only cmd");
+            free (cmd);
+            return (NULL);
+        }
+        if (cmd)
+        {
+            ft_strlcpy (cmd, argv, len + 1);
+            return (cmd); //follow where to free from here
+        }
+    }
+    //return (ft_strdup(argv));//if there is no space it till be return the same cmd name
+    return (argv);                       //would be ok to return argv directly instead of strdup? check this
+}
+
 #include <stdio.h>
 
 //To find executables cmd1 or cmd2
@@ -186,11 +216,15 @@ char    **exec_argv(int argc, char **argv)
 
 int	execution(char	**nargv, char **const envp)
 {
+//    char    *cmd1_name;//pending testing
+    char    *cmd2_name;
+//    char    *cmd1_name;//pending testing
 //	char	*cmd1_path;
     char    *cmd2_path;
-//find the path of the cmd1
+//finr cmd name in the argv and then find the path of the cmd1 and then cmd2
 /*
-    cmd1_path = find_path(nargv[0], envp); //make it later for cmd2
+    cmd1_name = get_only_cmd(nargv[0]);//pending testing
+    cmd1_path = find_path(cmd1_name, envp); //make it later for cmd2
 	if (cmd1_path == NULL)
 	{
 		perror ("path of cmd1 not found for execution");
@@ -206,7 +240,8 @@ int	execution(char	**nargv, char **const envp)
 		exit (EXIT_FAILURE);
 	}//pending to free somewhere else cmd1_path when success but after execution
 */  
-    cmd2_path = find_path(nargv[0], envp);
+    cmd2_name = get_only_cmd(nargv[0]);
+    cmd2_path = find_path(cmd2_name, envp);
     if (cmd2_path == NULL)
     {
         perror ("path of cmd2 not found for execution");
@@ -229,6 +264,8 @@ int	execution(char	**nargv, char **const envp)
 //Temporary changed to cmd2 for testing needs to be fixed later for all
 int	ini_check(char **argv, char **envp)
 {
+    char    *cmd_name;
+
 	//in this first if condition include the check for argv[4] which is file2
 	if (access(argv[2], F_OK) == -1)//to check if the file2 exist
 	{
@@ -247,7 +284,8 @@ int	ini_check(char **argv, char **envp)
         return (1);
     }
 	//in this final if condition include cmd2 to check if is executable argv[3]
-	if (access(find_path(argv[1], envp), X_OK) == -1)//pending fix parameters, needs to be the path
+	cmd_name = get_only_cmd(argv[1]);//argv[1] is to test cmd2 pending to test cmd1
+    if (access(find_path(cmd_name, envp), X_OK) == -1)//pending fix parameters, needs to be the path
  	{
 		perror("cmd2 is not executable");
 		return (1);
@@ -298,6 +336,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
         printf("Successfully opened: %s (fd = %d)\n", argv[2], file2);//testing
         if (redir_output(file2))//if redirection fails
         {
+            printf("redirection cmd2 file2 good");
             //if redirection failes, close file2
             if (close (file2) == - 1)//if redirection fails
             {
@@ -305,8 +344,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
                 return (1);
             }
         }
-        printf("redirection cmd2 file2 good");
-		if (argv[1])//temporal for mvp with cmd1
+    	if (argv[1])//temporal for mvp with cmd1
         {
             	//need to be found right args before execution
             	//nargv has mallocs to check if succeed after use it

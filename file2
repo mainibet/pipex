@@ -1,5 +1,5 @@
-Redirection from cmd2 to file2 will beginNow will begin redir_output to file2Successfull redirection: now cmd2 stdout goes to file2 3
-redirection cmd2 file2 goodPath found for cmd1: /usr/bin/ls
+Now will begin redir_output to file2Successfull redirection: now cmd2 stdout goes to file2 3
+Path found for cmd1: /usr/bin/ls
 cmd2_path found for execution: /usr/bin/ls
 Execution of cmd2 will begin
 actual_output.txt
@@ -19,6 +19,14 @@ output.txt
 pipex
 pipex.c
 pipex.h
+pipex.o
+pipex.pdf
+testing
+test.txt
+pipex.pdf
+testing
+test.txt
+pex.h
 pipex.o
 pipex.pdf
 testing
