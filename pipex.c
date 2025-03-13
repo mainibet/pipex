@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 15:06:36 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 15:35:49 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,43 +128,43 @@ int	main(int argc, char **argv, char **envp)
 */
 
 #include <stdio.h>//just for testing
-//to redirect input
-/*
-int	redir_input(int file1)
-{
-	int	file1_dup;
+//to redirect input from file1 to cmd1 and from pipe[1] to cmd2
 
-	file1_dup = dup2(file1, STDIN_FILENO);
-	if (file1_dup == -1)
+int	redir_input(int fd)
+{
+	int	fd_dup;
+
+	fd_dup = dup2(fd, STDIN_FILENO);
+	if (fd_dup == -1)
 	{
 		perror ("Dup2 failed stdin file1 to cmd1");
 		return (1);
 	}
 	printf("Successfull redirection: now stdin comes from fd file1 %d\n", file1);
-	if (close(file1) == -1)
+	if (close(fd) == -1)
 	{
 		perror ("Error closing the file1 after redirection file1 to cmd1");
 		return (1);
 	}
 	return (0);
 }
-*/
-//to redirect output. first MVP cmd2 to file2
-int redir_output(int file2)
+
+//to redirect output. firsti MVP cmd2 to file2 then cmd1 to pipe[0]
+int redir_output(int fd)
 {
     printf("Now will begin redir_output to file2");
-    int file2_dup;//the one created to work with
+    int fd_dup;//the one created to work with
     
-    file2_dup = dup2(file2, STDOUT_FILENO);
-    if (file2_dup == -1)
+    fd_dup = dup2(fd, STDOUT_FILENO);
+    if (fd_dup == -1)
     {
         perror ("Dup2 failed with cmd2 to file2");
         return (1);
     }
     printf("Successfull redirection: now cmd2 stdout goes to file2 %d\n", file2);
-    if (close (file2) == - 1)//close file2 after dup2 in redirection
+    if (close (fd) == - 1)//close file2 after dup2 in redirection
     {
-        perror ("Error closing file2 after redirection cmd2 to file2");
+        perror ("Error closing file2 or pipefd[0] after redirection cmd2 to file2");
         return (1);
     }
     return (0);
@@ -318,12 +318,12 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 //open file1 and redirection file1 to cmd1
         /*
         file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
-		if ( file1 == -1)
+		if (file1 == - 1)
 		{
 			perror ("Error opening file");
 			return (1);
 		}
-		//to redirec fil1 as intput of cmd1
+		//to redirec file1 as intput of cmd1
 		if (redir_input(file1))
 		{
 			//if redirection fails, close file1
@@ -334,8 +334,27 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 			}
 		}
 */
- //redirection cmd1 to pipefd[0]
-        
+ //redirection cmd1 to pipefd[1] stdout
+ /*
+        if (redir_output(pipefd[1]))//in the child process before this close pipefd[0];
+        {
+            if (close(pipefd[1]))
+            {
+                perror ("Error closing pipfd[1]");
+                return (1);
+            }
+        }//in the child process close pipefd[1] after using it
+         //can be close like: if (close(pipefd[1]) == -1) { perror("error closing pipfd[1]"); return (1) }
+*/
+        //redirection pipefd[0] to cmd2 stdin
+        if (redir_input(pipefd[0]))
+        {
+            if (close(pipefd[0] == - 1))
+            {
+                perror ("Error closing pipefd[0]");
+                return (1);
+            }
+        }
         //code to read the file if open() success and then redirect cmd2 to file2
         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
 		if (file2 == -1)
