@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 15:02:33 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 15:06:36 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -309,7 +309,12 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 	else
 	{
 		ini_check(argv, envp);//this will tak all argv to check them
-        pipe(pipefd);//to create pipefd[0] and pipfd[1]
+        pipe(pipefd);//to create pipefd[0] to read and pipfd[1] to write
+        if (pipe(pipefd) == - 1)
+        {
+            perror("pipe failed");
+            exit (EXIT_FAILURE);
+        }
 //open file1 and redirection file1 to cmd1
         /*
         file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
@@ -329,6 +334,8 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 			}
 		}
 */
+ //redirection cmd1 to pipefd[0]
+        
         //code to read the file if open() success and then redirect cmd2 to file2
         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
 		if (file2 == -1)
