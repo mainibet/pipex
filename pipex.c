@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 15:38:06 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 15:48:16 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ int	redir_input(int fd)
 		perror ("Dup2 failed stdin file1 to cmd1");
 		return (1);
 	}
-	printf("Successfull redirection: now stdin comes from fd file1 %d\n", fd);
+	fprintf(stderr, "Successfull redirection\n");
 	if (close(fd) == -1)
 	{
 		perror ("Error closing the file1 after redirection file1 to cmd1");
@@ -161,7 +161,7 @@ int redir_output(int fd)
         perror ("Dup2 failed with cmd2 to file2");
         return (1);
     }
-    printf("Successfull redirection: now cmd2 stdout goes to file2 %d\n", fd);
+    fprintf(stderr, "Successfull redirection\n");
     if (close (fd) == - 1)//close file2 after dup2 in redirection
     {
         perror ("Error closing file2 or pipefd[0] after redirection cmd2 to file2");
@@ -362,7 +362,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
             perror ("Error opening file2");
             return (1);
         }
-        printf("Successfully opened: %s (fd = %d)\n", argv[2], file2);//testing
+        fprintf(stderr, "Successfully opened\n");//testing
         //correct order of redirections: file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
 /*commented temporary to test pipe()
         if (redir_output(file2))//if redirection fails
