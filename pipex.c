@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 12:48:53 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/13 15:02:33 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,6 +301,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 //	int	file1;//to open fd file1
 	int file2;//to opoen file2
     char    **nargv;
+    int pipefd[2];//check if norminette is happy with this
 
 	ft_printf("argc including the program: %d\n", argc);//just for mvp
 	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
@@ -308,7 +309,9 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 	else
 	{
 		ini_check(argv, envp);//this will tak all argv to check them
-/*
+        pipe(pipefd);//to create pipefd[0] and pipfd[1]
+//open file1 and redirection file1 to cmd1
+        /*
         file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
 		if ( file1 == -1)
 		{
@@ -326,7 +329,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 			}
 		}
 */
-        //code to read the file if open() success
+        //code to read the file if open() success and then redirect cmd2 to file2
         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
 		if (file2 == -1)
         {
@@ -334,6 +337,8 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
             return (1);
         }
         printf("Successfully opened: %s (fd = %d)\n", argv[2], file2);//testing
+        //correct order of redirections: file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
+/*commented temporary to test pipe()
         if (redir_output(file2))//if redirection fails
         {
             printf("redirection cmd2 file2 good");
@@ -367,6 +372,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
 //			return (1);
 //      }
 //      include close file2_dup (after use)
-	}
+*/	
+    }
 	return (0);
 }
