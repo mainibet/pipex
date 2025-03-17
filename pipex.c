@@ -257,49 +257,38 @@ char    **exec_arg(int argc, char **argv)
 #include <stdio.h> //just for testing
 //it will need cmd name in the argv and then find the path with that
 //the execute the cmd
+//i = 2 where is the position of cmd1
+//i will loop until argc -1 where is the final cmd, excluding file2
+//final free after successfulexecve call
 //REFACTOR: make it work with any command, depend on how is called.
-int	execution(char	**nargv, char **const envp)
+int	execution(int argc, char	**nargv, char **const envp)
 {
-//    char    *cmd1_name;//pending testing
-    char    *cmd2_name;
-//    char    *cmd1_name;//pending testing
-//	char	*cmd1_path;
-    char    *cmd2_path;
-/*
-    cmd1_name = get_only_cmd(nargv[0]);//pending testing
-    cmd1_path = find_path(cmd1_name, envp); //make it later for cmd2
-	if (cmd1_path == NULL)
-	{
-		perror ("path of cmd1 not found for execution");
-		exit (EXIT_FAILURE);
-	}
-	printf("cmd1_path found for execution: %s\n", cmd1_path);//just for testing
-	printf("Execution of cmd1 will begin\n");//testing
-	//try to execute cmd
-	if (execve(cmd1_path, nargv, envp) == -1)
-	{
-		perror ("execve failed in cmd1");//before the next step I have to check free that are needed from finding the path
-		free (cmd1_path);
-		exit (EXIT_FAILURE);
-	}//pending to free somewhere else cmd1_path when success but after execution
-*/  
-    cmd2_name = get_only_cmd(nargv[0]);
-    cmd2_path = find_path(cmd2_name, envp);
-    if (cmd2_path == NULL)
+    char    *cmd_name;
+    char    *cmd_path;
+    int i;
+
+    i = 2;
+    while (i < argc - 1)
     {
-        perror ("path of cmd2 not found for execution");
-        exit (EXIT_FAILURE);
+        cmd_name = get_only_cmd(nargv[i]);
+        cmd_path = find_path (cmd_name, envp);
+        if (!cmd_path)
+        {
+            perror ("command_path not found");//check if previous mallocs needs to be free here
+            exit(EXIT_FAILURE);
+        }
+        fprintf(stderr, "cmd_path found for execution: %s\n", cmd_path);//testing
+        fprintf(stderr, "Execution of cmd[%d] will begin\n", i - 1);//testing
+        if (execve(cmd_path, nargv, envp) == - 1)
+        {
+            perror ("execve failed");
+		    free (cmd_path);//check if previous mallocs needs to be free here
+		    exit (EXIT_FAILURE);
+        }
+        free(cmd_path);// //check if previous mallocs needs to be free here
+        i++;
     }
-    printf ("cmd2_path found for execution: %s\n", cmd2_path);//testing
-    printf ("Execution of cmd2 will begin\n");//testing
-        //try to executes cmd2
-    if (execve (cmd2_path, nargv, envp) == - 1)
-    {
-        perror ("execve failed in cmd2");
-        free (cmd2_path);
-        exit (EXIT_FAILURE);
-    }//pending to free cmd2_path somewhere when success and after the execution
-    return (0);	
+    return (0);
 }
 
 #include <stdio.h> //just for testing
@@ -362,16 +351,14 @@ int	ini_check(int argc, char **argv, char **envp)
 //refirect cmd1 to piepfd[1] stdout
 //If any redirection fail the fd will be close (file1 or pipefd[1])
 //After all redirections will be done the execution
-int child1(int  *pipefd, char **cmd1, char **file1, char **envp)//make it more general
+//before execution needs to be found the correct arg for execve with exec_arg
+int child1(int argc, int  *pipefd, char **argv, char **envp)//make it more general
 {
     close_fd(pipefd[0]);
-    //to redirec file1 as intput of cmd1
-		if (redir_input(**file1))//I change file1 to **file1 check it
-			close_fd (**file1)//I changed file1 to **file1, check it
- //redirection cmd1 to pipefd[1] stdout
+		if (redir_input(*argv[1]))//I change file1 to **file1 check it
+			close_fd (*argvp1[1]);//I changed file1 to **file1, check it
         if (redir_output(pipefd[1]))
-            close_fd (pipefd[1])
-        //before execution call execv_arg
+            close_fd (pipefd[1]);
         if (argv[1])//temporal for mvp with cmd1
         {
             	//need to be found right args before execution
