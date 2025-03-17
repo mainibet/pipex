@@ -351,29 +351,24 @@ int	ini_check(int argc, char **argv, char **envp)
 //refirect cmd1 to piepfd[1] stdout
 //If any redirection fail the fd will be close (file1 or pipefd[1])
 //After all redirections will be done the execution
-//before execution needs to be found the correct arg for execve with exec_arg
+//before execution needs to be found the correct arg for execve with exec_arg, will remove argv[0], file1 and file2
 int child1(int argc, int  *pipefd, char **argv, char **envp)//make it more general
 {
+    char **nargv;
     close_fd(pipefd[0]);
 		if (redir_input(*argv[1]))//I change file1 to **file1 check it
 			close_fd (*argvp1[1]);//I changed file1 to **file1, check it
         if (redir_output(pipefd[1]))
             close_fd (pipefd[1]);
-        if (argv[1])//temporal for mvp with cmd1
+        nargv = NULL;
+        nargv = exec_arg(argc,argv);//nargv has mallocs to check if succeed after use it
+        if (!nargv)
         {
-            	//need to be found right args before execution
-            	//nargv has mallocs to check if succeed after use it
-            	nargv = NULL;
-                nargv = exec_arg(argc,argv);//will remove original argv[0] and will exclude file1 and file2
-		        if (!nargv)
-            	{
-            		perror ("Failed to remove first argv called from main");
-                	return (1);
-            	}
-            	else
-                	execution(nargv, envp);
-        	}
-        execution(cmd1, envp);//here the first param is the one calle nargv in the main
+            perror ("Failed to remove first argv called from main");//check if something needs to be free
+            return (1);
+        }
+        else
+            execution(argc, *nargv, *envp);           
         //after execution close fd used
     return (0);//check if this is ok
 }
