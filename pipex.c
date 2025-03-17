@@ -6,14 +6,16 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/13 17:23:12 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/17 12:47:52 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
 //needed as a parameter of execve
-
+//strncmp is to compare the first 5 bytes
+//the return will be +5 to get it withou :PATH="
+//At the end it will return NULl if path is not found (hanlding error)
 char	*get_path_env(char **envp)
 {
 	int	i;
@@ -21,13 +23,12 @@ char	*get_path_env(char **envp)
 	i = 0;
 	while (envp[i])
 	{
-		if (ft_strncmp(envp[i], "PATH=", 5) == 0)//to compare the first 5 bytes
-			return (envp[i] + 5);//to return the path with out :PATH="
+		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
+			return (envp[i] + 5);
 		i++;
 	}
 	return (NULL);//if is not found
 }
-
 
 //get_path_testing
 /*#include <stdio.h>
@@ -45,9 +46,13 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
+
 //To get the cmd name in the argv in cases like "echo hello world" or "cat -n" or "ls -l"
 //This will make the function find_path work correctly before the execution and in the initial check
-
+//If (space) means when space is not NULL
+//I find len to get the length of the command name (without flags or parameters)
+//When return(argv) it means there is no space so the return will be the same cmd name
+//Other option I explored was to return(ft_strdup(argv)) but I think that would be ok to return directly argv because I won't change anything and avoid to malloc
 char *get_only_cmd(char *argv)
 {
     char *space;
@@ -55,10 +60,10 @@ char *get_only_cmd(char *argv)
     size_t len;
 
     space = ft_strchr(argv, ' ');
-    if (space)//if space is not NULL
+    if (space)
     {
-        len = space - argv; //to get the lenth of the command
-        cmd = malloc (sizeof (char) * len + 1); //check if succed where to free
+        len = space - argv;
+        cmd = malloc (sizeof (char) * len + 1);
         if (!cmd)
         {
             perror ("Malloc failed to get only cmd");
@@ -68,19 +73,20 @@ char *get_only_cmd(char *argv)
         if (cmd)
         {
             ft_strlcpy (cmd, argv, len + 1);
-            return (cmd); //follow where to free from here
+            return (cmd); //follow where to free cmd from here
         }
     }
-    //return (ft_strdup(argv));//if there is no space it till be return the same cmd name
-    return (argv);                       //would be ok to return argv directly instead of strdup? check this
+    return (argv);
 }
 
 #include <stdio.h>
 
 //To find executables cmd1 or cmd2
+//file_pat is to hold the return
+//dir is the array with all the splited directories
 char	*find_path(char *argv, char **envp)
 {
-	char	*file_path;//to hold the return
+	char	*file_path;
 	char	**dir;
 	char	*path;
 	char	*each_path;
@@ -101,16 +107,16 @@ char	*find_path(char *argv, char **envp)
 		free (each_path);
 		if (access (file_path, F_OK) == 0)
 		{	//just for testing
-			printf("Path found for cmd1: %s\n", file_path);
+			printf("Path found for cmd1: %s\n", file_path);//testing
 			return (file_path);//free in other place
 		}//for testing
 		free (file_path);
 		i++;
-	}//maybe after this is needed to check memory and free
+	}
 	return (NULL);
 }
 /*
-//find_path specific for executable files testing cmd1 cmd2
+//TESTING: find_path specific for executable files cmd1 cmd2
 #include <stdio.h>
 int	main(int argc, char **argv, char **envp)
 {
@@ -126,94 +132,143 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 */
-
+//reusable handling error when close fd
+int close_fd(int fd)
+{
+    if (close(fd) == - 1)
+    {
+        perror ("error closing fd");
+        return (1);
+    }
+    return (0);
+}
 #include <stdio.h>//just for testing
+//child1
 //to redirect input from file1 to cmd1 and from pipe[1] to cmd2
 
 int	redir_input(int fd)
 {
 	int	fd_dup;
 
-	fd_dup = dup2(fd, STDIN_FILENO);
-	if (fd_dup == -1)
+	fd_dup = dup2(fd, STDIN_FILENO);//el fd que entra como parametro seria pipefd[0] o file1
+	if (fd_dup == -1)//creo que falta cerrar en caso de error el fd_dup
 	{
-		perror ("Dup2 failed stdin file1 to cmd1");
+		perror ("Dup2 failed stdin");
 		return (1);
 	}
-	fprintf(stderr, "Successfull redirection\n");
-	if (close(fd) == -1)
-	{
-		perror ("Error closing the file1 after redirection file1 to cmd1");
-		return (1);
-	}
+	fprintf(stderr, "Successfull redirection\n");//testing in stderr to see it in terminal
+    close_fd(fd);//shorter version, test it if close the correct fd, deberia ser el que se duplico, o sea pipefd[0] o file1.
+//	if (close(fd) == -1)
+//	{
+//		perror ("Error closing the file1 after redirection file1 to cmd1");
+//		return (1);
+//	}//check where to close fd_dup after is used.
 	return (0);
 }
 
 //to redirect output. firsti MVP cmd2 to file2 then cmd1 to pipe[0]
+//child2
+#include <stdio.h> //testing
 int redir_output(int fd)
 {
-    printf("Now will begin redir_output to file2");
+    fprintf(stderr, "Now will begin redir_output to file2");//testing
     int fd_dup;//the one created to work with
     
-    fd_dup = dup2(fd, STDOUT_FILENO);
-    if (fd_dup == -1)
+    fd_dup = dup2(fd, STDOUT_FILENO);//fd is the one parameter can be pipefd[1] or file2
+    if (fd_dup == -1)//needs to be close fd_dup it fails
     {
         perror ("Dup2 failed with cmd2 to file2");
         return (1);
     }
-    fprintf(stderr, "Successfull redirection\n");
-    if (close (fd) == - 1)//close file2 after dup2 in redirection
-    {
-        perror ("Error closing file2 or pipefd[0] after redirection cmd2 to file2");
-        return (1);
-    }
+    fprintf(stderr, "Successfull redirection\n");//testing
+    close_fd(fd);//this will be file2 or pipfed[1] after dup2
+    //if (close (fd) == - 1)//close file2 after dup2 in redirection
+    //{
+      //  perror ("Error closing file2 or pipefd[0] after redirection cmd2 to file2");
+    //    return (1);
+   // }//pending to close fd_dup after use
     return (0);
 }
-//function to get the right args for 
-//execve() consider the firs argv the file that needs to be process by the cmd//about it man says:  By convention, the first of these  strings (i.e.,  argv[0])  should  contain the filename associated with the file being executed.
+//find the arg with the cmd and duplicate it to include it later in the new array as argv[[0]]
+char *get_narg(char *argv)
+{
+    char    *cmd_arg;
 
+    cmd_arg = ft_strdup(argv);
+    if (!cmd_arg)
+    {
+        perror ("strdup failed in get_arg");
+        return (NULL);//because it failed
+    }
+    else
+        return (cmd_arg);//check where to free after use
+}
+//clean-up memory if there was an error when creating the new arrary to exec
+void    free_memory (char **narg, int   j)
+{
+    while (j > 0)
+    {
+        free (narg[j - 1]);
+        j--;
+    }
+    free (narg);
+}
+
+//function to get the right args for execution
+//execve() consider the firs argv the file that needs to be process by the cmd//about it man says:  By convention, the first of these  strings (i.e.,  argv[0])  should  contain the filename associated with the file being executed.
+//if (argc <= 1) to check there are enough arg
+//malloc is for (argc -1) because we exclude the programs name
+//DO REFACTOR TO MAKE IT WORK INDEPENDEN OF THE ARG, DEPENDING HOW IS CALLED
 char    **exec_argv(int argc, char **argv)
 {
     char    **new_arg;
-    int i;
-    int j;
+    int i;//loop in old arr
+    int j;//loop in new array
+    int limit;//for the while loop
 
-    if (argc <= 1)//if there are not enought arg
+    if (argc <= 1)
         return (NULL);
-    new_arg = malloc (sizeof(char *) * argc);//check where will be free if success. It will be with malloc to make possible the bonus
-    if (!new_arg)
+    new_arg = malloc (sizeof(char *) * (argc - 2));
+        if (!new_arg)
     {
         perror ("malloc failed in remove_first_argv");
         return (NULL);
     }
-//    i = 2;//to skip original argv[0] and the argv[1] from original args
-    i = 1;//testing for cmd2 to file2. to skip argv[0] and argv[2]
-    j = 0;//to loop in the new array
-//while loop only for cmd1
-//    while (i < argc)//execve only needs as argv the cmds. In a future version needs to loop until argv[arc-1] to skip file2
-       while (i < argc -1)
+    j = 0;
+    if (argv[2])
     {
-        new_arg[j] = ft_strdup(argv[i]);//to duplicate each argv original so after need to be freed each one if success
-        if (!new_arg[j])
-        {
-            perror ("strdup failed in removed_first_arg");
-            while (j > 0)
-            {
-                free (new_arg[j - 1]);//to free each argument argv created before the one that failed. It is j - 1 because the final position is a badone
-                j--;
-            }
-            free(*new_arg);//to free the array when somethin failed
-            return (NULL);//because it failed
-        }
-        i++;
-        j++;
+        i = 2;//for cmd1, to skip argv[0] from the original args
+        limit = argc;
     }
+    else if (argv[3])
+    {
+        i = 3; //for cmd2, to skip argv[0] and argv[1]
+        limit = argc - 1;
+    }
+    else
+    {
+        free (new_arg);//free the array if there is none of the cmd args
+        return (NULL);
+    }
+    while (i < limit)//to loop in cmd1
+        {
+            new_arg[j] = get_narg(argv[i]);
+            if (!new_arg[j])
+            {
+                free_memory(new_arg, j);
+                return (NULL);
+            }
+            i++;
+            j++;
+        }
     new_arg[j] = NULL;
-    return (new_arg);
+    return (new_arg);//check later where to free after use
 }
 
 #include <stdio.h> //just for testing
-
+//it will need cmd name in the argv and then find the path with that
+//the execute the cmd
+//REFACTOR: makeit work with any command, depend on how is called.
 int	execution(char	**nargv, char **const envp)
 {
 //    char    *cmd1_name;//pending testing
@@ -221,7 +276,6 @@ int	execution(char	**nargv, char **const envp)
 //    char    *cmd1_name;//pending testing
 //	char	*cmd1_path;
     char    *cmd2_path;
-//finr cmd name in the argv and then find the path of the cmd1 and then cmd2
 /*
     cmd1_name = get_only_cmd(nargv[0]);//pending testing
     cmd1_path = find_path(cmd1_name, envp); //make it later for cmd2
@@ -247,7 +301,7 @@ int	execution(char	**nargv, char **const envp)
         perror ("path of cmd2 not found for execution");
         exit (EXIT_FAILURE);
     }
-    printf ("cmd2_path found for execution: %s\n", cmd2_path);
+    printf ("cmd2_path found for execution: %s\n", cmd2_path);//testing
     printf ("Execution of cmd2 will begin\n");//testing
         //try to executes cmd2
     if (execve (cmd2_path, nargv, envp) == - 1)
@@ -260,6 +314,7 @@ int	execution(char	**nargv, char **const envp)
 }
 
 #include <stdio.h> //just for testing
+//REFACTOR: make it work with all the cmds, depends in how is called
 //initial checking: if file1 exist, if file1 has read permissions, if cmd1 is executable
 //Temporary changed to cmd2 for testing needs to be fixed later for all
 int	ini_check(char **argv, char **envp)
@@ -295,22 +350,26 @@ int	ini_check(char **argv, char **envp)
     printf("cmd2 and file2 passed initial check\n");
 	return (0);
 }
-//process for cmd1
+//process for cmd1 (FORK1)
+//pipefd[0] not needed in this process but inherited
+//redirect file1 as input of cmd1
+//refirect cmd1 to piepfd[1] stdout
+//If any redirection fail the fd will be close (file1 or pipefd[1])
+//After all redirections will be done the execution
 int child1(int  *pipefd, char **cmd1, char **file1, char **envp)
 {
-    close(pipefd[0]);//not needed in this process, but was inherited
+    close(pipefd[0]);
     //to redirec file1 as intput of cmd1
-		if (redir_input(file1))
+		if (redir_input(**file1))//I change file1 to **file1 check it
 		{
-			//if redirection fails, close file1
-			if (close(file1) == -1)
+			if (close(**file1) == -1)//I changed file1 to **file1, check it
 			{
 				perror("Error closing the file");
 				return (1);
 			}
 		}
  //redirection cmd1 to pipefd[1] stdout
-        if (redir_output(pipefd[1]))//in the child process before this close pipefd[0];
+        if (redir_output(pipefd[1]))
         {
             if (close(pipefd[1]) == -1)
             {
@@ -318,7 +377,6 @@ int child1(int  *pipefd, char **cmd1, char **file1, char **envp)
                 return (1);
             }
         }
-        execution(cmd1, envp);//here the first param is the one calle nargv in the main
         if (close(pipefd[1] == - 1))
         {
             if (close (pipefd[1]))
@@ -326,27 +384,51 @@ int child1(int  *pipefd, char **cmd1, char **file1, char **envp)
                 perror ("Error closing pipefd[1]");
                 return (1);
             }
-        }
+        }//close pipefd[1] after using same as file1
+        execution(cmd1, envp);//here the first param is the one calle nargv in the main
+    return (0);//check if this is ok
 }
 
-//process for cmd2
-int child2(int *pipefd, char **cmd2)
+//process for cmd2(FORK2)
+//pipefd[1] not needed in this process
+//If any reirection fails will be close the used fd pipefd[0] or file2
+//After all the reirection will be done the execution
+int child2 (int  *pipefd, char **cmd1, char **file2, char **envp)
 {
-    pid_t   pid2;
-    int status2;
-
-    pid2 = fork();
-    close(pipefd[1]); //not needed in this process
+    close(pipefd[1]);
+    //redirection pipefd[0] to cmd2 stdin
+    if (redir_input(pipefd[0]))
+    {
+        if (close(pipefd[0] == - 1))
+        {
+            perror ("Error closing pipefd[0]");
+            return (1);
+        }
+    }
+    //redirection cmd2 to file2
+    if (redir_output(**file2))//check if works, i change it from file2 to **file2
+    {
+        printf("redirection cmd2 file2 good");
+        if (close (**file2) == -1)//check if works, I changed from file2 to **file2
+        {
+            perror ("Error closing file2 after failed redirection cmd2");
+            return (1);
+        }
+    }//close pipefd[0] after using it, same file2
+    execution(cmd2, envp);//here the first param is the one calle nargv in the main
+    return (0);//check is this is ok
 }
-
+//clean main version
 int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly with 4arg
 {
-//	int	file1;//to open fd file1
+	int	file1;//to open fd file1
 	int file2;//to opoen file2
-//    char    **nargv;
+    char    **nargv;
     int pipefd[2];//check if norminette is happy with this
     pid_t   pid1;
+    pid_t   pid2;
     int status1;
+    int status2;
 
 	ft_printf("argc including the program: %d\n", argc);//just for mvp
 	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
@@ -362,61 +444,35 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
         }
         //first child
         pid1 = fork();
-        if (pid1 == 0);
+        if (pid1 == 0)//check explanation in obsidian
         {
             child1(pipefd, argv, NULL, envp);//ojo que debe ser nargv y revisar si ese NULL si se necesita
             exit (0);
         }
         else
         {
-            child2(pipefd, argv, NULL, envp);//revisar que arg necesita y que recibe
+            pid2 = fork();
+            if (pid2 == 0)
+            {
+                child2(pipefd, argv, NULL, envp);//revisar que arg necesita y que recibe
+                exit(0);
+            }
+            else
+            {
+                waitpid(pid1, &status1, 0);  
+                waitpid(pid2, &status2, 0);          
+            }
         }
-        else
-        {
-            waitpid(pid1, &status1, 0);  
-            eaitpid(pid2, &status2, 0);          
-        }
-//open file1 and redirection file1 to cmd1
-        /*
+//open file1 to be used in child1 when redirection file1 to cmd1
+
         file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
 		if (file1 == - 1)
 		{
 			perror ("Error opening file");
 			return (1);
 		}
-		//to redirec file1 as intput of cmd1
-		if (redir_input(file1))
-		{
-			//if redirection fails, close file1
-			if (close(file1) == -1)
-			{
-				perror("Error closing the file");
-				return (1);
-			}
-		}
-*/
- //redirection cmd1 to pipefd[1] stdout
- /*
-        if (redir_output(pipefd[1]))//in the child process before this close pipefd[0];
-        {
-            if (close(pipefd[1]))
-            {
-                perror ("Error closing pipfd[1]");
-                return (1);
-            }
-        }//in the child process close pipefd[1] after using it
-         //can be close like: if (close(pipefd[1]) == -1) { perror("error closing pipfd[1]"); return (1) }
-*/
-        //redirection pipefd[0] to cmd2 stdin
-        if (redir_input(pipefd[0]))
-        {
-            if (close(pipefd[0] == - 1))
-            {
-                perror ("Error closing pipefd[0]");
-                return (1);
-            }
-        }//close pipefd after using it
-        //code to read the file if open() success and then redirect cmd2 to file2
+//open file2 to be used in child2 when redirection cmd2 to file2
+ 
         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
 		if (file2 == -1)
         {
@@ -424,18 +480,7 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
             return (1);
         }
         fprintf(stderr, "Successfully opened\n");//testing
-        //correct order of redirections: file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
-/*commented temporary to test pipe()
-        if (redir_output(file2))//if redirection fails
-        {
-            printf("redirection cmd2 file2 good");
-            //if redirection failes, close file2
-            if (close (file2) == - 1)//if redirection fails
-            {
-                perror ("Error closing file2 after failed redirection cmd2");
-                return (1);
-            }
-        }//close pipefd after using it
+//correct order of redirections (this will happen in childs): file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
     	if (argv[1])//temporal for mvp with cmd1
         {
             	//need to be found right args before execution
@@ -463,3 +508,131 @@ int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly
     }
 	return (0);
 }
+
+//previous main
+
+// int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly with 4arg
+// {
+// //	int	file1;//to open fd file1
+// 	int file2;//to opoen file2
+// //    char    **nargv;
+//     int pipefd[2];//check if norminette is happy with this
+//     pid_t   pid1;
+//     int status1;
+
+// 	ft_printf("argc including the program: %d\n", argc);//just for mvp
+// 	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
+// 		return (ft_printf("include 2 args\n"), 1);
+// 	else
+// 	{
+// 		ini_check(argv, envp);//this will tak all argv to check them
+//         pipe(pipefd);//to create pipefd[0] to read and pipfd[1] to write
+//         if (pipe(pipefd) == - 1)
+//         {
+//             perror("pipe failed");
+//             exit (EXIT_FAILURE);
+//         }
+//         //first child
+//         pid1 = fork();
+//         if (pid1 == 0);
+//         {
+//             child1(pipefd, argv, NULL, envp);//ojo que debe ser nargv y revisar si ese NULL si se necesita
+//             exit (0);
+//         }
+//         else
+//         {
+//             child2(pipefd, argv, NULL, envp);//revisar que arg necesita y que recibe
+//             exit(0);
+//         }
+//         else
+//         {
+//             waitpid(pid1, &status1, 0);  
+//             eaitpid(pid2, &status2, 0);          
+//         }
+// //open file1 and redirection file1 to cmd1
+//         /*
+//         file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
+// 		if (file1 == - 1)
+// 		{
+// 			perror ("Error opening file");
+// 			return (1);
+// 		}
+// 		//to redirec file1 as intput of cmd1
+// 		if (redir_input(file1))
+// 		{
+// 			//if redirection fails, close file1
+// 			if (close(file1) == -1)
+// 			{
+// 				perror("Error closing the file");
+// 				return (1);
+// 			}
+// 		}
+// */
+//  //redirection cmd1 to pipefd[1] stdout
+//  /*
+//         if (redir_output(pipefd[1]))//in the child process before this close pipefd[0];
+//         {
+//             if (close(pipefd[1]))
+//             {
+//                 perror ("Error closing pipfd[1]");
+//                 return (1);
+//             }
+//         }//in the child process close pipefd[1] after using it
+//          //can be close like: if (close(pipefd[1]) == -1) { perror("error closing pipfd[1]"); return (1) }
+// */
+//         //redirection pipefd[0] to cmd2 stdin
+//         if (redir_input(pipefd[0]))
+//         {
+//             if (close(pipefd[0] == - 1))
+//             {
+//                 perror ("Error closing pipefd[0]");
+//                 return (1);
+//             }
+//         }//close pipefd after using it
+//         //code to read the file if open() success and then redirect cmd2 to file2
+//         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
+// 		if (file2 == -1)
+//         {
+//             perror ("Error opening file2");
+//             return (1);
+//         }
+//         fprintf(stderr, "Successfully opened\n");//testing
+//         //correct order of redirections: file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
+// /*commented temporary to test pipe()
+//         if (redir_output(file2))//if redirection fails
+//         {
+//             printf("redirection cmd2 file2 good");
+//             //if redirection failes, close file2
+//             if (close (file2) == - 1)//if redirection fails
+//             {
+//                 perror ("Error closing file2 after failed redirection cmd2");
+//                 return (1);
+//             }
+//         }//close pipefd after using it
+//     	if (argv[1])//temporal for mvp with cmd1
+//         {
+//             	//need to be found right args before execution
+//             	//nargv has mallocs to check if succeed after use it
+//             	nargv = NULL;
+//                 nargv = exec_argv(argc,argv);//will remove original argv[0]
+// 		        if (!nargv)
+//             	{
+//             		perror ("Failed to remove first argv called from main");
+//                 	return (1);
+//             	}
+//             	else
+//                 	execution(nargv, envp);
+//         	}
+// 		//Need to close file1 when is not longer used
+// //This close(file1) was moved after the redirection file1
+// //check if this is the position for file1_dup. Temporary comment until fork()
+// //		if (close(file1_dup) == -1)
+// //		{
+// //			perror ("Error closing the file");
+// //			return (1);
+// //      }
+// //      include close file2_dup (after use)
+// */	
+//     }
+// 	return (0);
+// }
