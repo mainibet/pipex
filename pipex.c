@@ -364,12 +364,18 @@ int child1(int argc, int  *pipefd, char **argv, char **envp)//make it more gener
         nargv = exec_arg(argc,argv);//nargv has mallocs to check if succeed after use it
         if (!nargv)
         {
-            perror ("Failed to remove first argv called from main");//check if something needs to be free
+            perror ("Failed to create neww array with arg before execution");//check if something needs to be free
             return (1);
         }
         else
-            execution(argc, *nargv, *envp);           
+            if (execution(argc, nargv, envp) != 0)
+            {
+                perror ("Execution faild in child 1");
+                free(nargv);//check if other free ar needed
+                return (1)
+            }           
         //after execution close fd used
+        free (nargv);//check this. would be after execution ok
     return (0);//check if this is ok
 }
 
