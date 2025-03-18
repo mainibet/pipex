@@ -107,7 +107,7 @@ char	*find_path(char *argv, char **envp)
 		free (each_path);
 		if (access (file_path, F_OK) == 0)
 		{	//just for testing
-			printf("Path found for cmd1: %s\n", file_path);//testing
+			printf("Path foundfor cmd: %s\n", file_path);//testing
 			return (file_path);//free in other place
 		}//for testing
 		free (file_path);
@@ -158,11 +158,6 @@ int	redir_input(int fd)
 	}
 	fprintf(stderr, "Successfull redirection\n");//testing in stderr to see it in terminal
     close_fd(fd);//shorter version, test it if close the correct fd, deberia ser el que se duplico, o sea pipefd[0] o file1.
-//	if (close(fd) == -1)
-//	{
-//		perror ("Error closing the file1 after redirection file1 to cmd1");
-//		return (1);
-//	}//check where to close fd_dup after is used.
 	return (0);
 }
 
@@ -171,7 +166,7 @@ int	redir_input(int fd)
 #include <stdio.h> //testing
 int redir_output(int fd)
 {
-    fprintf(stderr, "Now will begin redir_output to file2");//testing
+    fprintf(stderr, "Now will begin redir_output to file2\n");//testing
     int fd_dup;//the one created to work with
     
     fd_dup = dup2(fd, STDOUT_FILENO);//fd is the one parameter can be pipefd[1] or file2
@@ -182,11 +177,6 @@ int redir_output(int fd)
     }
     fprintf(stderr, "Successfull redirection\n");//testing
     close_fd(fd);//this will be file2 or pipfed[1] after dup2
-    //if (close (fd) == - 1)//close file2 after dup2 in redirection
-    //{
-      //  perror ("Error closing file2 or pipefd[0] after redirection cmd2 to file2");
-    //    return (1);
-   // }//pending to close fd_dup after use
     return (0);
 }
 //find the arg with the cmd and duplicate it to include it later in the new array as argv[[0]]
@@ -223,23 +213,22 @@ void    free_memory (char **narg, int   j)
 //index i begins in 2 position of cmd1
 //loop until argc -1 to exclude file2
 //new_arg[j] doesn't occupy memory, so doesn't need to be included in malloc
-char    **exec_arg(int argc, char **argv)
+char    **exec_arg(int argc, char **argv, int child_num)
 {
+    fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");
     char    **new_arg;
     int i;//loop in old arr
     int j;//loop in new array
 
-    if (argc <= 1)
-        return (NULL);
     new_arg = malloc (sizeof(char *) * (argc - 3));//check
-        if (!new_arg)
+    if (!new_arg)
     {
         perror ("malloc failed in exec_arg");
         return (NULL);
     }
     j = 0;
     i = 2;
-    while (i < argc - 1)
+    while ((child_num == 1 && i < argc - 1) || (child_num == 2 && i >= 2))
         {
             new_arg[j] = get_narg(argv[i]);
             if (!new_arg[j])
@@ -247,8 +236,8 @@ char    **exec_arg(int argc, char **argv)
                 free_memory(new_arg, j);
                 return (NULL);
             }
-            i++;
-            j++;
+        i++;
+        j++;
         }
     new_arg[j] = NULL;
     return (new_arg);//check later where to free after use
@@ -264,6 +253,7 @@ char    **exec_arg(int argc, char **argv)
 //REFACTOR: make it work with any command, depend on how is called.
 void	execution(int argc, char	**nargv, char **const envp)
 {
+    fprintf(stderr, "\n\n\nEXECUTION WILL BEGIN\n");//testing
     char    *cmd_name;
     char    *cmd_path;
     int i;
@@ -272,6 +262,8 @@ void	execution(int argc, char	**nargv, char **const envp)
     while (i < argc - 1)
     {
         cmd_name = get_only_cmd(nargv[i]);
+        fprintf(stderr, "cmd_name is: %s\n", get_only_cmd(nargv[i]));//testing
+        fprintf(stderr, "cmd_name is: %s\n", cmd_name);//testing
         cmd_path = find_path (cmd_name, envp);
         if (!cmd_path)
         {
@@ -363,9 +355,11 @@ int	ini_check(int argc, char **argv, char **envp)
 //if fails needs to exit(1) to stop the process and go back to the parent
 void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 {
+    fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     char **nargv;
     int fd_dup;
     int pipefd_dup;
+    int child_num;
     
     close_fd(pipefd[0]);
 		if ((fd_dup = redir_input(fd[0])) < 0)//To redirect file1 as input of cmd1
@@ -373,15 +367,16 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
             perror("Failed redirection input in child1");
             exit(1);
         }
-        fprintf(stderr, "redirection input child1  good");//testing
+        fprintf(stderr, "redirection INPUT child1  good\n");//testing
         if ((pipefd_dup = redir_output(pipefd[1])) < 0)//to redirect cmd1 output to pipe
         {
             close_fd (fd_dup);
-            perror("Failed redirection output in child1");//check if needed because there is perroor in redir_stdout
+            perror("Failed redirection OUTPUT in child1");//check if needed because there is perroor in redir_stdout
             exit(1);
         }
-        fprintf(stderr, "redirection output child1  good");//testing
-        nargv = exec_arg(argc,argv);//nargv has mallocs to check if succeed after use it
+        fprintf(stderr, "Redirection output child1  good\n");//testing
+        child_num = 1;
+        nargv = exec_arg(argc,argv, child_num);//nargv has mallocs to check if succeed after use it
         if (!nargv)
         {
             perror ("Failed to create neww array with arg before execution");//check if something needs to be free
@@ -389,6 +384,8 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
             close_fd(pipefd_dup);
             exit(1);
         }
+        fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
+        fprintf(stderr, "We are in child1 about to call execution\n");//testing
         execution(argc, nargv, envp);
         perror ("Execution failed in child 1");
         free(nargv);//check if execution failed if not do it in the parent
@@ -406,9 +403,11 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 //then redirection output from cmd2 to file2
 void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 {
+    fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
     char **nargv;
     int fd_dup;
     int pipefd_dup;
+    int child_num;
 
     close(pipefd[1]);
     if ((pipefd_dup = redir_input(pipefd[0])) < 0)
@@ -416,15 +415,16 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
         perror("Failed redirection input in child2");
         exit(1);
     }
-    fprintf(stderr, "redirection input child2  good");//testing
+    fprintf(stderr, "redirection input child2  good\n");//testing
     if ((fd_dup = redir_output(fd[1])) < 0)
     {
         close_fd(pipefd_dup);
         perror ("Failed redirection output in child2");
         exit(1);
     }
-    fprintf(stderr, "redirection output cmd2 file2 good");//testing
-    nargv = exec_arg(argc, argv);
+    fprintf(stderr, "Redirection output cmd2 file2 good\n");//testing
+    child_num = 2;
+    nargv = exec_arg(argc, argv, child_num);
     if (!nargv)
     {
         perror ("Failed to remove first argv called from main");
@@ -432,6 +432,8 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
         close_fd(fd_dup);
         exit (1);
     }
+    fprintf(stderr, "This is the NEW ARRAY in child2 of arg: %s\n\n\n", *nargv);//testing
+    fprintf(stderr, "We are in child2 about to call execution\n");//testing
     execution(argc, nargv, envp);
     perror ("Execution failed in child2");
     free (nargv);
@@ -449,7 +451,7 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 //fd[1] is file2
 int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette is happy with this
 {
-    if (ini_check(argv, envp) < 0)
+    if (ini_check(argc, argv, envp) < 0)
         return (-1);
     fd[0] = open(argv[1], O_RDONLY);
     if (fd[0] == - 1)
@@ -514,11 +516,13 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
         perror ("error waiting child1");
         return (-1);
     }
+    fprintf(stderr, "Child1 finished now we are in the parent about to begin child2\n");//testing
     if (wait_child(pid2, &status2) == - 1)
     {
         perror ("Error waiting child2");
         return (-1);
     }
+    fprintf(stderr, "We are again in the parent after success of child2\n");//testing
     return (0);
 }
 
@@ -548,11 +552,16 @@ int	main(int argc, char **argv, char **envp)
         exit (EXIT_FAILURE);
     }
     parent(argc, pipefd, argv, envp, fd);
+    fprintf(stderr, "We will close in the parent all the fd opened\n");//testing
     close_fd(fd[0]);
+    fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
     close_fd(fd[1]);
+    fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
     close_fd(pipefd[0]);
+    fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
     close_fd(pipefd[1]);
-	return (0);
+    fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
+    return (0);
 }
 
 //previous main

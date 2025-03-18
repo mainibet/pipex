@@ -1,0 +1,4 @@
+Hello from file1!
+This is a test.
+Pipex is awesome!
+
