@@ -361,14 +361,14 @@ int	ini_check(int argc, char **argv, char **envp)
 //If the execution succees pipefd[1] can't manually be closed in the child1 and nargv 
 //can't be free, needs to be close in the parent and the child close it automatically
 //if fails needs to exit(1) to stop the process and go back to the parent
-void child1(int argc, int  *pipefd, char **argv, char **envp)//make it more general
+void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 {
     char **nargv;
     int fd_dup;
     int pipefd_dup;
     
     close_fd(pipefd[0]);
-		if ((fd_dup = redir_input(argv[1])) < 0)//To redirect file1 as input of cmd1
+		if ((fd_dup = redir_input(fd[0])) < 0)//To redirect file1 as input of cmd1
         {
             perror("Failed redirection input in child1");
             exit(1);
@@ -404,7 +404,7 @@ void child1(int argc, int  *pipefd, char **argv, char **envp)//make it more gene
 //After all the reirection will be done the execution
 //First redir input from pipe to cmd2
 //then redirection output from cmd2 to file2
-void child2 (int argc, int  *pipefd, char **argv, char **envp)
+void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 {
     char **nargv;
     int fd_dup;
@@ -417,7 +417,7 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp)
         exit(1);
     }
     fprintf(stderr, "redirection input child2  good");//testing
-    if ((fd_dup = redir_output(argv[argc - 1])) < 0)
+    if ((fd_dup = redir_output(fd[1])) < 0)
     {
         close_fd(pipefd_dup);
         perror ("Failed redirection output in child2");
@@ -486,7 +486,7 @@ int wait_child(pid_t  pid, int *status)
 
 //pid1 is child1 (cmd1)
 //pid2 is child2 (cmd2)
-int parent(int argc, int *pipefd, char **argv, char **envp)
+int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
 {
     pid_t   pid1;
     pid_t   pid2;
@@ -500,7 +500,7 @@ int parent(int argc, int *pipefd, char **argv, char **envp)
         return (-1);
     }
     else if (pid1 == 0)
-        child1(argc, pipefd, argv, envp);
+        child1(argc, pipefd, argv, envp, fd);
     pid2 = fork();
     if (pid2 == -1)
     {
@@ -508,7 +508,7 @@ int parent(int argc, int *pipefd, char **argv, char **envp)
         return (-1);
     }
     else if (pid2 == 0)
-        child2(argc, pipefd, argv, envp);
+        child2(argc, pipefd, argv, envp, fd);
     if (wait_child(pid1, &status1) == - 1)
     {
         perror ("error waiting child1");
@@ -538,23 +538,20 @@ int	main(int argc, char **argv, char **envp)
     ft_printf("argc including the program: %d\n", argc);//testing
     if (argc != 5)
         return (ft_printf("include 4 args\n"), 1);
-	else
-	{
-		if (open_fd(argc, argv, envp, fd) == -1)
-            return (1);
-        if (pipe(pipefd) == - 1)
-        {
-            perror("pipe failed");
-            close_fd(fd[0]);
-            close_fd(fd[1]);
-            exit (EXIT_FAILURE);
-        }
-        parent(argc, pipefd, argv, envp);
+    if (open_fd(argc, argv, envp, fd) == -1)
+        return (1);
+    if (pipe(pipefd) == - 1)
+    {
+        perror("pipe failed");
         close_fd(fd[0]);
         close_fd(fd[1]);
-        close_fd(pipefd[0]);
-        close_fd(pipefd[1]);
+        exit (EXIT_FAILURE);
     }
+    parent(argc, pipefd, argv, envp, fd);
+    close_fd(fd[0]);
+    close_fd(fd[1]);
+    close_fd(pipefd[0]);
+    close_fd(pipefd[1]);
 	return (0);
 }
 
