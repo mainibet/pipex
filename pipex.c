@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/17 12:47:52 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/18 11:48:06 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ int	redir_input(int fd)
 	fd_dup = dup2(fd, STDIN_FILENO);//el fd que entra como parametro seria pipefd[0] o file1
 	if (fd_dup == -1)//creo que falta cerrar en caso de error el fd_dup
 	{
-		perror ("Dup2 failed stdin");
+		perror ("Dup2 failed stdin in redir_input");
 		return (1);
 	}
 	fprintf(stderr, "Successfull redirection\n");//testing in stderr to see it in terminal
@@ -177,7 +177,7 @@ int redir_output(int fd)
     fd_dup = dup2(fd, STDOUT_FILENO);//fd is the one parameter can be pipefd[1] or file2
     if (fd_dup == -1)//needs to be close fd_dup it fails
     {
-        perror ("Dup2 failed with cmd2 to file2");
+        perror ("Dup2 failed with cmd2 to file2 in redir_output");
         return (1);
     }
     fprintf(stderr, "Successfull redirection\n");//testing
@@ -255,13 +255,14 @@ char    **exec_arg(int argc, char **argv)
 }
 
 #include <stdio.h> //just for testing
+//Is a void function because if success go back to the parent and if it fails just will exit
 //it will need cmd name in the argv and then find the path with that
 //the execute the cmd
 //i = 2 where is the position of cmd1
 //i will loop until argc -1 where is the final cmd, excluding file2
 //final free after successfulexecve call
 //REFACTOR: make it work with any command, depend on how is called.
-int	execution(int argc, char	**nargv, char **const envp)
+void	execution(int argc, char	**nargv, char **const envp)
 {
     char    *cmd_name;
     char    *cmd_path;
@@ -282,13 +283,12 @@ int	execution(int argc, char	**nargv, char **const envp)
         if (execve(cmd_path, nargv, envp) == - 1)
         {
             perror ("execve failed");
-		    free (cmd_path);//check if previous mallocs needs to be free here
+            free (cmd_path);//check if previous mallocs needs to be free here
 		    exit (EXIT_FAILURE);
         }
         free(cmd_path);// //check if previous mallocs needs to be free here
         i++;
     }
-    return (0);
 }
 
 #include <stdio.h> //just for testing
@@ -325,178 +325,235 @@ int	ini_check(int argc, char **argv, char **envp)
 	if ((access(argv[1], F_OK) == -1) || (access(argv[argc - 1], F_OK) == -1))//to check if the file2 exist
 	{
 		perror("At least 1 file doesn't exist");
-		return (1);
+		return (-1);
 	}
 	else if (access(argv[1], R_OK) == -1)
 	{
 		perror("No read permissions for file1");
-		return (1);
+		return (-1);
 	}
     if (access(argv[argc - 1], W_OK) == - 1)
     {
         perror ("No write permissions for file2");
-        return (1);
+        return (-1);
     }
     printf("File1 and file2 passed initial check\n");//for testing
     if (check_cmd(argc, argv, envp) != 0)
     {
         perror("Non executable command");
-        return (1);
+        return (-1);
     }
 	return (0);
 }
 //process for cmd1 (FORK1)
+//Function void because it succees or exit to go back to the parent, doesn't return
+//*nargv is the new array of arguments needed for execution
+//fd_dup is the dup of file1 after the redirection
+//pipefd_dup is the dup of pipefd after the redirection 
 //pipefd[0] not needed in this process but inherited
 //redirect file1 as input of cmd1
 //refirect cmd1 to piepfd[1] stdout
-//If any redirection fail the fd will be close (file1 or pipefd[1])
-//After all redirections will be done the execution
-//before execution needs to be found the correct arg for execve with exec_arg, will remove argv[0], file1 and file2
-int child1(int argc, int  *pipefd, char **argv, char **envp)//make it more general
+//If any redirection fail the fd dups will be close 
+//(the original fd are close in the redir functions)
+//After all redirections will be done before the execution
+//The execution will be done with the duplicated fd
+//Need to be found the right arg for execution (nargv) to get in position 0 the cmd file
+//If the execution succees pipefd[1] can't manually be closed in the child1 and nargv 
+//can't be free, needs to be close in the parent and the child close it automatically
+//if fails needs to exit(1) to stop the process and go back to the parent
+void child1(int argc, int  *pipefd, char **argv, char **envp)//make it more general
 {
     char **nargv;
+    int fd_dup;
+    int pipefd_dup;
+    
     close_fd(pipefd[0]);
-		if (redir_input(*argv[1]))//I change file1 to **file1 check it
-			close_fd (*argvp1[1]);//I changed file1 to **file1, check it
-        if (redir_output(pipefd[1]))
-            close_fd (pipefd[1]);
-        nargv = NULL;
+		if ((fd_dup = redir_input(argv[1])) < 0)//To redirect file1 as input of cmd1
+        {
+            perror("Failed redirection input in child1");
+            exit(1);
+        }
+        fprintf(stderr, "redirection input child1  good");//testing
+        if ((pipefd_dup = redir_output(pipefd[1])) < 0)//to redirect cmd1 output to pipe
+        {
+            close_fd (fd_dup);
+            perror("Failed redirection output in child1");//check if needed because there is perroor in redir_stdout
+            exit(1);
+        }
+        fprintf(stderr, "redirection output child1  good");//testing
         nargv = exec_arg(argc,argv);//nargv has mallocs to check if succeed after use it
         if (!nargv)
         {
             perror ("Failed to create neww array with arg before execution");//check if something needs to be free
-            return (1);
+            close_fd(fd_dup);//close fd because it failed
+            close_fd(pipefd_dup);
+            exit(1);
         }
-        else
-            if (execution(argc, nargv, envp) != 0)
-            {
-                perror ("Execution faild in child 1");
-                free(nargv);//check if other free ar needed
-                return (1)
-            }           
-        //after execution close fd used
-        free (nargv);//check this. would be after execution ok
-    return (0);//check if this is ok
+        execution(argc, nargv, envp);
+        perror ("Execution failed in child 1");
+        free(nargv);//check if execution failed if not do it in the parent
+        close_fd(fd_dup);//close fd if execution failed if not close it in the parent
+        close_fd(pipefd_dup);
+        exit (1);//to finish child process when finish after execution failure 
 }
 
 //process for cmd2(FORK2)
 //pipefd[1] not needed in this process
-//If any reirection fails will be close the used fd pipefd[0] or file2
+//If any reirection fails will be close the dup fd opened before
+//File2 and pipfd are close in redir functions if that fails
 //After all the reirection will be done the execution
-int child2 (int  *pipefd, char **cmd1, char **file2, char **envp)//make it more general
+//First redir input from pipe to cmd2
+//then redirection output from cmd2 to file2
+void child2 (int argc, int  *pipefd, char **argv, char **envp)
 {
+    char **nargv;
+    int fd_dup;
+    int pipefd_dup;
+
     close(pipefd[1]);
-    //redirection pipefd[0] to cmd2 stdin
-    if (redir_input(pipefd[0]))
-        close_fd(pipefd[0]);
-    //redirection cmd2 to file2
-    if (redir_output(**file2))//check if works, i change it from file2 to **file2
-    {//testing
-        fprintf("redirection cmd2 file2 good");//testing
-        close_fd(**file2)//check if works, I changed from file2 to **file2
-    }//close pipefd[0] after using it, same file2
-    //before execution call execv_arg
-    if (argv[1])//temporal for mvp with cmd1
-        {
-            	//need to be found right args before execution
-            	//nargv has mallocs to check if succeed after use it
-            	nargv = NULL;
-                nargv = exec_arg(argc,argv);//will remove original argv[0] and will exclude file1 and file2
-		        if (!nargv)
-            	{
-            		perror ("Failed to remove first argv called from main");
-                	return (1);
-            	}
-            	else
-                	execution(nargv, envp);
-        	}
-    execution(cmd2, envp);//here the first param is the one calle nargv in the main
-    //after execution close fd use
-    return (0);//check is this is ok
+    if ((pipefd_dup = redir_input(pipefd[0])) < 0)
+    {
+        perror("Failed redirection input in child2");
+        exit(1);
+    }
+    fprintf(stderr, "redirection input child2  good");//testing
+    if ((fd_dup = redir_output(argv[argc - 1])) < 0)
+    {
+        close_fd(pipefd_dup);
+        perror ("Failed redirection output in child2");
+        exit(1);
+    }
+    fprintf(stderr, "redirection output cmd2 file2 good");//testing
+    nargv = exec_arg(argc, argv);
+    if (!nargv)
+    {
+        perror ("Failed to remove first argv called from main");
+        close_fd(pipefd_dup);
+        close_fd(fd_dup);
+        exit (1);
+    }
+    execution(argc, nargv, envp);
+    perror ("Execution failed in child2");
+    free (nargv);
+    close_fd(pipefd_dup);
+    close_fd(fd_dup);
+    exit(1);
 }
-//clean main version
-int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly with 4arg
+
+//First initial check
+//file 1 is argv[1]
+//file2 is argv[argc - 1]
+//Then open file1 to be used in child1 when redirection input of cmd1
+//Then open file2 to be use in child2 in redir cmd2 output
+//fd[0] is file1
+//fd[1] is file2
+int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette is happy with this
 {
-	int	file1;//to open fd file1
-	int file2;//to open file2
-    char    **nargv;
-    int pipefd[2];//check if norminette is happy with this
+    if (ini_check(argv, envp) < 0)
+        return (-1);
+    fd[0] = open(argv[1], O_RDONLY);
+    if (fd[0] == - 1)
+	{
+	    perror ("Error opening file1");
+		return (-1);
+	}
+    fd[1] = open(argv[argc - 1], O_WRONLY);
+	if (fd[1] == -1)
+    {
+        perror ("Error opening file2");
+        close_fd(fd[0]);
+        return (-1);//check if this is valid
+    }
+    fprintf(stderr, "Successfully opened\n");//testing
+    return (0);
+}
+//parent function to do the fork() for the child processess
+int wait_child(pid_t  pid, int *status)
+{
+    if (waitpid(pid, status, 0) == - 1)
+    {
+        perror ("Error waiting for child");
+        return (-1);
+    }
+    if (WIFEXITED(*status) && WEXITSTATUS(*status) != 0)
+    {
+        perror ("Child failed");
+        return (-1);
+    }
+    fprintf(stderr, "Child process %d completed\n", pid);//testing
+    return (0);
+}
+
+//pid1 is child1 (cmd1)
+//pid2 is child2 (cmd2)
+int parent(int argc, int *pipefd, char **argv, char **envp)
+{
     pid_t   pid1;
     pid_t   pid2;
     int status1;
     int status2;
 
-	ft_printf("argc including the program: %d\n", argc);//just for mvp
-	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
-		return (ft_printf("include 2 args\n"), 1);
+    pid1 = fork();
+    if (pid1 == - 1)
+    {
+        perror ("Fork failed for child1");
+        return (-1);
+    }
+    else if (pid1 == 0)
+        child1(argc, pipefd, argv, envp);
+    pid2 = fork();
+    if (pid2 == -1)
+    {
+        perror ("Fork failed for child2");
+        return (-1);
+    }
+    else if (pid2 == 0)
+        child2(argc, pipefd, argv, envp);
+    if (wait_child(pid1, &status1) == - 1)
+    {
+        perror ("error waiting child1");
+        return (-1);
+    }
+    if (wait_child(pid2, &status2) == - 1)
+    {
+        perror ("Error waiting child2");
+        return (-1);
+    }
+    return (0);
+}
+
+//mandatory part has to work exactly with 4arg
+//pipefd[2] Pipe for inter-process communication
+//correct order of redirections (this will happen in childs):
+//file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
+//open_fd will do the initial check of all arg and open file1 and file2
+//fd[0] is file1
+//fd[1] is file2
+
+int	main(int argc, char **argv, char **envp)
+{
+    int pipefd[2];//check if norminette is happy with this
+    int fd[2];
+    
+    ft_printf("argc including the program: %d\n", argc);//testing
+    if (argc != 5)
+        return (ft_printf("include 4 args\n"), 1);
 	else
 	{
-		ini_check(argv, envp);//this will tak all argv to check them
-        pipe(pipefd);//to create pipefd[0] to read and pipfd[1] to write
+		if (open_fd(argc, argv, envp, fd) == -1)
+            return (1);
         if (pipe(pipefd) == - 1)
         {
             perror("pipe failed");
+            close_fd(fd[0]);
+            close_fd(fd[1]);
             exit (EXIT_FAILURE);
         }
-        //first child
-        pid1 = fork();
-        if (pid1 == 0)//check explanation in obsidian
-        {
-            child1(pipefd, argv, NULL, envp);//ojo que debe ser nargv y revisar si ese NULL si se necesita
-            exit (0);
-        }
-        else
-        {
-            pid2 = fork();
-            if (pid2 == 0)
-            {
-                child2(pipefd, argv, NULL, envp);//revisar que arg necesita y que recibe
-                exit(0);
-            }
-            else
-            {
-                waitpid(pid1, &status1, 0);  
-                waitpid(pid2, &status2, 0);          
-            }
-        }
-//open file1 to be used in child1 when redirection file1 to cmd1
-
-        file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
-		if (file1 == - 1)
-		{
-			perror ("Error opening file");
-			return (1);
-		}
-//open file2 to be used in child2 when redirection cmd2 to file2
- 
-        file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
-		if (file2 == -1)
-        {
-            perror ("Error opening file2");
-            return (1);
-        }
-        fprintf(stderr, "Successfully opened\n");//testing
-//correct order of redirections (this will happen in childs): file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
-//the following to get nargv will be moved to each child	
-    // if (argv[1])//temporal for mvp with cmd1
-        // {
-        //     	//need to be found right args before execution
-        //     	//nargv has mallocs to check if succeed after use it
-        //     	nargv = NULL;
-        //         nargv = exec_arg(argc,argv);//will remove original argv[0] and will exclude file1 and file2
-		//         if (!nargv)
-        //     	{
-        //     		perror ("Failed to remove first argv called from main");
-        //         	return (1);
-        //     	}
-        //     	else
-        //         	execution(nargv, envp);
-        // 	}
-//after child process close all fd opened
-		close_fd(file1_dup);
-        close_fd(file2_dup);//check
-        close_fd(pipefd[0]);//check
-        close_fd(pipefd[1]);//check
+        parent(argc, pipefd, argv, envp);
+        close_fd(fd[0]);
+        close_fd(fd[1]);
+        close_fd(pipefd[0]);
+        close_fd(pipefd[1]);
     }
 	return (0);
 }
