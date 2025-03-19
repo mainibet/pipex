@@ -6,7 +6,7 @@
 /*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/18 11:48:06 by albetanc         ###   ########.fr       */
+/*   Updated: 2025/03/19 15:36:45 by albetanc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,10 +203,54 @@ void    free_memory (char **narg, int   j)
     }
     free (narg);
 }
-
-Char **split_cmd()
+//to create the new array for execution in case the cmd arg has multiple words
+//this means flags or parameteres
+char **new_arr_cmd(char *argv)
 {
+    char **cmd;
+    size_t  len;
+    
+    len = 0;
+    cmd = ft_split(argv, ' ');//pending handling error the other function with split
+    if (!cmd)
+    {
+        perror("malloc failed in ft_split");
+        return (NULL);
+    }
+    while (cmd[len])
+        len++;
+    return (cmd);
+}
+//duplicate cmd_arr to new_arr
+char **dup_new_cmd (char **cmd)
+{
+    size_t  len;
+    size_t  i;
+    char    **new_arg;
 
+    len = 0;
+    i = 0;
+    while (cmd[len])
+        len++;
+    new_arg = malloc(sizeof(char *) * (len + 1));
+    if (!new_arg)
+    {
+        perror ("malloc failed in exec_arg");
+        return (NULL);
+    }
+    while ( i < len)
+    {
+        new_arg[i] = ft_strdup(cmd[i]);
+        if (!new_arg[i])
+        {
+            perror ("ft_strdup failed in the preocess of new_arg");
+            free_memory(new_arg, i);//check if is ok, check if the previos str where free
+            return (NULL);
+        }
+        i++;
+    }
+    new_arg[len] = NULL;
+    return (new_arg);
 }
 //function to get the right args for execution
 //I'm not using strdup because I understan args won't change CHECK THIS
@@ -223,19 +267,58 @@ Char **split_cmd()
 char    **exec_arg(int argc, char **argv, int child_num)
 {
     fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");//testing
+    char    **cmd;
     char    **new_arg;
 
-    new_arg = malloc (sizeof(char *) * (2));//check later to free
-    if (!new_arg)
+    if (ft_strchr(argv[2], ' '))
     {
-        perror ("malloc failed in exec_arg");
-        return (NULL);
+        cmd = new_arr_cmd(argv[2]);
+        if (!cmd)
+        {
+            perror("error getting new_arr_cmd in exec_arg");
+            return (NULL);
+        }
+        new_arg = dup_new_cmd(cmd);
+        if (!new_arg)
+        {
+            perror ("malloc failed in exec_arg");
+            free (cmd);
+            return (NULL);
+        }
+        free (cmd);//free after dup
     }
-    if (child_num == 1)
-        new_arg[0] = argv[2];
-    else if (child_num == 2)
-        new_arg[0] = argv[argc - 2];
-    new_arg[1] = NULL;
+    else if (ft_strchr(argv[argc - 2], ' '))
+    {
+        cmd = new_arr_cmd(argv[argc - 2]);
+        if (!cmd)
+        {
+            perror("error getting new_arr_cmd in exec_arg");
+            return (NULL);
+        }
+        new_arg = dup_new_cmd(cmd);
+        if (!new_arg)
+        {
+            perror ("malloc failed in exec_arg");
+            free (cmd);
+            return (NULL);
+        }
+        free (cmd);//free after dup
+    }
+    else
+    {
+        new_arg = malloc (sizeof(char *) * (2));//check later to free
+        if (!new_arg)
+        {
+            perror ("malloc failed in exec_arg");
+            return (NULL);
+        }
+        new_arg[1] = NULL;
+        if (child_num == 1)
+           new_arg[0] = argv[2];
+        else if (child_num == 2)
+          new_arg[0] = argv[argc - 2];
+        new_arg[1] = NULL;
+    }
     return (new_arg);//check later where to free after use
 }
 
@@ -247,37 +330,28 @@ char    **exec_arg(int argc, char **argv, int child_num)
 //i will loop until argc -1 where is the final cmd, excluding file2
 //final free after successfulexecve call
 //REFACTOR: make it work with any command, depend on how is called.
-void	execution(int argc, char	**nargv, char **const envp)
+void	execution(char	**nargv, char **const envp)
 {
     fprintf(stderr, "\n\n\nEXECUTION WILL BEGIN\n");//testing
     char    *cmd_name;
     char    *cmd_path;
-    int i;
 
-    i = 2;
-    while (i < argc - 1)
+    cmd_name = get_only_cmd(nargv[0]);
+    fprintf(stderr, "cmd_name is: %s\n", cmd_name);//testing
+    cmd_path = find_path (cmd_name, envp);
+    if (!cmd_path)
     {
-        cmd_name = get_only_cmd(nargv[i]);
-        fprintf(stderr, "cmd_name is: %s\n", get_only_cmd(nargv[i]));//testing
-        fprintf(stderr, "cmd_name is: %s\n", cmd_name);//testing
-        cmd_path = find_path (cmd_name, envp);
-        if (!cmd_path)
-        {
-            perror ("command_path not found");//check if previous mallocs needs to be free here
-            exit(EXIT_FAILURE);
-        }
-        fprintf(stderr, "cmd_path found for execution: %s\n", cmd_path);//testing
-        fprintf(stderr, "Execution of cmd[%d] will begin\n", i - 1);//testing
-        if (execve(cmd_path, nargv, envp) == - 1)
-        {
-            perror ("execve failed");
-            free (cmd_path);//check if previous mallocs needs to be free here
-		    exit (EXIT_FAILURE);
-        }
-        free(cmd_path);// //check if previous mallocs needs to be free here
-        i++;
+        perror ("command_path not found");//check if previous mallocs needs to be free here
+        exit(EXIT_FAILURE);
     }
-}
+    fprintf(stderr, "cmd_path found for execution: %s\n", cmd_path);//testing
+    fprintf(stderr, "Execution of cmd[%s] will begin\n", cmd_name);//testing
+    fprintf(stderr, "Will be used this as nargv: %s and %s\n", nargv[0], nargv[1]);//testing
+    execve(cmd_path, nargv, envp);
+    perror ("execve failed");
+    free (cmd_path);//check if previous mallocs needs to be free here
+	exit (EXIT_FAILURE);
+}//  free(cmd_path);// //check if previous mallocs needs to be free here. is free ok?
 
 #include <stdio.h> //just for testing
 //i begins in 2 which is the position of cmd1
@@ -358,7 +432,7 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     int child_num;
     
     close_fd(pipefd[0]);
-		if ((fd_dup = redir_input(fd[0])) < 0)//To redirect file1 as input of cmd1
+	if ((fd_dup = redir_input(fd[0])) < 0)//To redirect file1 as input of cmd1
         {
             perror("Failed redirection input in child1");
             exit(1);
@@ -382,7 +456,7 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
         }
         fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
         fprintf(stderr, "We are in child1 about to call execution\n");//testing
-        execution(argc, nargv, envp);
+        execution(nargv, envp);
         perror ("Execution failed in child 1");
         free(nargv);//check if execution failed if not do it in the parent
         close_fd(fd_dup);//close fd if execution failed if not close it in the parent
@@ -411,14 +485,14 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
         perror("Failed redirection input in child2");
         exit(1);
     }
-    fprintf(stderr, "redirection input child2  good\n");//testing
+    fprintf(stderr, "redirection INPUT child2  good\n");//testing
     if ((fd_dup = redir_output(fd[1])) < 0)
     {
         close_fd(pipefd_dup);
-        perror ("Failed redirection output in child2");
+        perror ("Failed redirection OUTPUT in child2");
         exit(1);
     }
-    fprintf(stderr, "Redirection output cmd2 file2 good\n");//testing
+    fprintf(stderr, "Redirection OUTPUT cmd2 file2 good\n");//testing
     child_num = 2;
     nargv = exec_arg(argc, argv, child_num);
     if (!nargv)
@@ -430,7 +504,7 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     }
     fprintf(stderr, "This is the NEW ARRAY in child2 of arg: %s\n\n\n", *nargv);//testing
     fprintf(stderr, "We are in child2 about to call execution\n");//testing
-    execution(argc, nargv, envp);
+    execution(nargv, envp);
     perror ("Execution failed in child2");
     free (nargv);
     close_fd(pipefd_dup);
@@ -468,6 +542,7 @@ int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette 
 //parent function to do the fork() for the child processess
 int wait_child(pid_t  pid, int *status)
 {
+    fprintf(stderr, "parent is about to wait");//testing
     if (waitpid(pid, status, 0) == - 1)
     {
         perror ("Error waiting for child");
@@ -484,6 +559,9 @@ int wait_child(pid_t  pid, int *status)
 
 //pid1 is child1 (cmd1)
 //pid2 is child2 (cmd2)
+//pid == 0 means we are in child process
+//pid > 0 means we are in the parent process
+//fork() returns -1 if something fails
 int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
 {
     pid_t   pid1;
@@ -503,6 +581,7 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
     if (pid2 == -1)
     {
         perror ("Fork failed for child2");
+        wait_child(pid1, &status1);
         return (-1);
     }
     else if (pid2 == 0)
