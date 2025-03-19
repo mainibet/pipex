@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/05 12:36:59 by albetanc          #+#    #+#             */
-/*   Updated: 2025/03/19 15:36:45 by albetanc         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "pipex.h"
 
 //needed as a parameter of execve
@@ -586,6 +574,15 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
     }
     else if (pid2 == 0)
         child2(argc, pipefd, argv, envp, fd);
+    fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
+    close_fd(fd[0]);
+    fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
+    close_fd(fd[1]);
+    fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
+    close_fd(pipefd[0]);
+    fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
+    close_fd(pipefd[1]);
+    fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
     if (wait_child(pid1, &status1) == - 1)
     {
         perror ("error waiting child1");
@@ -608,7 +605,6 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
 //open_fd will do the initial check of all arg and open file1 and file2
 //fd[0] is file1
 //fd[1] is file2
-
 int	main(int argc, char **argv, char **envp)
 {
     int pipefd[2];//check if norminette is happy with this
@@ -627,142 +623,6 @@ int	main(int argc, char **argv, char **envp)
         exit (EXIT_FAILURE);
     }
     parent(argc, pipefd, argv, envp, fd);
-    fprintf(stderr, "We will close in the parent all the fd opened\n");//testing
-    close_fd(fd[0]);
-    fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-    close_fd(fd[1]);
-    fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
-    close_fd(pipefd[0]);
-    fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
-    close_fd(pipefd[1]);
-    fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
+    fprintf(stderr, "\n\n\nPROGRAM FINISHED\n\n\n");
     return (0);
 }
-
-//previous main
-
-// int	main(int argc, char **argv, char **envp)//mandatory part has to work exactly with 4arg
-// {
-// //	int	file1;//to open fd file1
-// 	int file2;//to opoen file2
-// //    char    **nargv;
-//     int pipefd[2];//check if norminette is happy with this
-//     pid_t   pid1;
-//     int status1;
-
-// 	ft_printf("argc including the program: %d\n", argc);//just for mvp
-// 	if (argc != 3)//temporary, just for this mvp with file1 cmd1 AT THE END MUST BE EXACTLY 4
-// 		return (ft_printf("include 2 args\n"), 1);
-// 	else
-// 	{
-// 		ini_check(argv, envp);//this will tak all argv to check them
-//         pipe(pipefd);//to create pipefd[0] to read and pipfd[1] to write
-//         if (pipe(pipefd) == - 1)
-//         {
-//             perror("pipe failed");
-//             exit (EXIT_FAILURE);
-//         }
-//         //first child
-//         pid1 = fork();
-//         if (pid1 == 0);
-//         {
-//             child1(pipefd, argv, NULL, envp);//ojo que debe ser nargv y revisar si ese NULL si se necesita
-//             exit (0);
-//         }
-//         else
-//         {
-//             child2(pipefd, argv, NULL, envp);//revisar que arg necesita y que recibe
-//             exit(0);
-//         }
-//         else
-//         {
-//             waitpid(pid1, &status1, 0);  
-//             eaitpid(pid2, &status2, 0);          
-//         }
-// //open file1 and redirection file1 to cmd1
-//         /*
-//         file1 = open(argv[1], O_RDONLY);//to open file1 in read-only mode
-// 		if (file1 == - 1)
-// 		{
-// 			perror ("Error opening file");
-// 			return (1);
-// 		}
-// 		//to redirec file1 as intput of cmd1
-// 		if (redir_input(file1))
-// 		{
-// 			//if redirection fails, close file1
-// 			if (close(file1) == -1)
-// 			{
-// 				perror("Error closing the file");
-// 				return (1);
-// 			}
-// 		}
-// */
-//  //redirection cmd1 to pipefd[1] stdout
-//  /*
-//         if (redir_output(pipefd[1]))//in the child process before this close pipefd[0];
-//         {
-//             if (close(pipefd[1]))
-//             {
-//                 perror ("Error closing pipfd[1]");
-//                 return (1);
-//             }
-//         }//in the child process close pipefd[1] after using it
-//          //can be close like: if (close(pipefd[1]) == -1) { perror("error closing pipfd[1]"); return (1) }
-// */
-//         //redirection pipefd[0] to cmd2 stdin
-//         if (redir_input(pipefd[0]))
-//         {
-//             if (close(pipefd[0] == - 1))
-//             {
-//                 perror ("Error closing pipefd[0]");
-//                 return (1);
-//             }
-//         }//close pipefd after using it
-//         //code to read the file if open() success and then redirect cmd2 to file2
-//         file2 = open(argv[2], O_WRONLY);//temporary for MVP file2 cmd2 at the end most be argv[5]
-// 		if (file2 == -1)
-//         {
-//             perror ("Error opening file2");
-//             return (1);
-//         }
-//         fprintf(stderr, "Successfully opened\n");//testing
-//         //correct order of redirections: file1 - cmd1, cmd1- pipefd[0], pipefd[1] to cmd2 and cmd2 to file2
-// /*commented temporary to test pipe()
-//         if (redir_output(file2))//if redirection fails
-//         {
-//             printf("redirection cmd2 file2 good");
-//             //if redirection failes, close file2
-//             if (close (file2) == - 1)//if redirection fails
-//             {
-//                 perror ("Error closing file2 after failed redirection cmd2");
-//                 return (1);
-//             }
-//         }//close pipefd after using it
-//     	if (argv[1])//temporal for mvp with cmd1
-//         {
-//             	//need to be found right args before execution
-//             	//nargv has mallocs to check if succeed after use it
-//             	nargv = NULL;
-//                 nargv = exec_argv(argc,argv);//will remove original argv[0]
-// 		        if (!nargv)
-//             	{
-//             		perror ("Failed to remove first argv called from main");
-//                 	return (1);
-//             	}
-//             	else
-//                 	execution(nargv, envp);
-//         	}
-// 		//Need to close file1 when is not longer used
-// //This close(file1) was moved after the redirection file1
-// //check if this is the position for file1_dup. Temporary comment until fork()
-// //		if (close(file1_dup) == -1)
-// //		{
-// //			perror ("Error closing the file");
-// //			return (1);
-// //      }
-// //      include close file2_dup (after use)
-// */	
-//     }
-// 	return (0);
-// }
