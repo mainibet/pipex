@@ -204,42 +204,38 @@ void    free_memory (char **narg, int   j)
     free (narg);
 }
 
+Char **split_cmd()
+{
+
+}
 //function to get the right args for execution
-//execve() consider the firs argv the file that needs to be process by the cmd//about it man says:  By convention, the first of these  strings (i.e.,  argv[0])  should  contain the filename associated with the file being executed.
-//if (argc <= 1) to check there are enough arg
-//malloc is for (argc -3) because we exclude the programs name, file1 and file2
-//i is the index of the old array
-//j is the index in the new array
+//I'm not using strdup because I understan args won't change CHECK THIS
+//The option with strdup for each child would be smt like:  
+//instead of new_arg[0] = argv[2]; do: new_arg[0] = strdup(argv[2]);
+//instead of new_arg[0] = argv[argc - 2]; do: new_arg[0] = strdup(argv[argc - 2]);
+//execve() consider the firs argv the file that needs to be process by the cmd
+//about it man says:  By convention, the first of these  strings (i.e.,
+//argv[0])  should  contain the filename associated with the file being executed.
+//malloc is for (2) to include only arg with cmd name and NULL to close correctly the arr
 //index i begins in 2 position of cmd1
 //loop until argc -1 to exclude file2
 //new_arg[j] doesn't occupy memory, so doesn't need to be included in malloc
 char    **exec_arg(int argc, char **argv, int child_num)
 {
-    fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");
+    fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");//testing
     char    **new_arg;
-    int i;//loop in old arr
-    int j;//loop in new array
 
-    new_arg = malloc (sizeof(char *) * (argc - 3));//check
+    new_arg = malloc (sizeof(char *) * (2));//check later to free
     if (!new_arg)
     {
         perror ("malloc failed in exec_arg");
         return (NULL);
     }
-    j = 0;
-    i = 2;
-    while ((child_num == 1 && i < argc - 1) || (child_num == 2 && i >= 2))
-        {
-            new_arg[j] = get_narg(argv[i]);
-            if (!new_arg[j])
-            {
-                free_memory(new_arg, j);
-                return (NULL);
-            }
-        i++;
-        j++;
-        }
-    new_arg[j] = NULL;
+    if (child_num == 1)
+        new_arg[0] = argv[2];
+    else if (child_num == 2)
+        new_arg[0] = argv[argc - 2];
+    new_arg[1] = NULL;
     return (new_arg);//check later where to free after use
 }
 
