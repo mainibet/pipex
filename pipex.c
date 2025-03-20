@@ -95,7 +95,7 @@ char	*find_path(char *argv, char **envp)
 		free (each_path);
 		if (access (file_path, F_OK) == 0)
 		{	//just for testing
-			printf("Path foundfor cmd: %s\n", file_path);//testing
+			fprintf(stderr, "Path found for cmd: %s\n", file_path);//testing
 			return (file_path);//free in other place
 		}//for testing
 		free (file_path);
@@ -258,7 +258,7 @@ char    **exec_arg(int argc, char **argv, int child_num)
     char    **cmd;
     char    **new_arg;
 
-    if (ft_strchr(argv[2], ' '))
+    if (ft_strchr(argv[2], ' ') && child_num == 1)
     {
         cmd = new_arr_cmd(argv[2]);
         if (!cmd)
@@ -275,7 +275,7 @@ char    **exec_arg(int argc, char **argv, int child_num)
         }
         free (cmd);//free after dup
     }
-    else if (ft_strchr(argv[argc - 2], ' '))
+    else if (ft_strchr(argv[argc - 2], ' ') && child_num == 2)
     {
         cmd = new_arr_cmd(argv[argc - 2]);
         if (!cmd)
@@ -361,7 +361,7 @@ int check_cmd(int argc, char **argv, char **envp)
         }
         i++;
     }
-    printf("cmds passed initial check\n");//testing
+    fprintf(stderr, "cmds passed initial check\n");//testing
     return (0);
 }
 
@@ -387,7 +387,7 @@ int	ini_check(int argc, char **argv, char **envp)
         perror ("No write permissions for file2");
         return (-1);
     }
-    printf("File1 and file2 passed initial check\n");//for testing
+    fprintf(stderr, "File1 and file2 passed initial check\n");//testing
     if (check_cmd(argc, argv, envp) != 0)
     {
         perror("Non executable command");
