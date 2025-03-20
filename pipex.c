@@ -205,8 +205,6 @@ char **new_arr_cmd(char *argv)
         perror("malloc failed in ft_split");
         return (NULL);
     }
-    while (cmd[len])
-        len++;
     return (cmd);
 }
 //duplicate cmd_arr to new_arr
