@@ -86,7 +86,7 @@ char	*find_path(char *argv, char **envp)
 		perror("PATH env not found");
 		return (NULL);
 	}
-	dir = ft_split(path, ':');
+	dir = ft_split(path, ':');//check split free and errors
 	i = 0;
 	while (dir[i])
 	{
@@ -98,7 +98,7 @@ char	*find_path(char *argv, char **envp)
 			fprintf(stderr, "Path found for cmd: %s\n", file_path);//testing
 			return (file_path);//free in other place
 		}//for testing
-		free (file_path);
+		free (file_path);//check position to free path that wont be return 
 		i++;
 	}
 	return (NULL);
