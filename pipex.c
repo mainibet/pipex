@@ -45,7 +45,8 @@ int	main(int argc, char **argv, char **envp)
 //If (space) means when space is not NULL
 //I find len to get the length of the command name (without flags or parameters)
 //When return(argv) it means there is no space so the return will be the same cmd name
-//Other option I explored was to return(ft_strdup(argv)) but I think that would be ok to return directly argv because I won't change anything and avoid to malloc
+//Other option I explored was to return(ft_strdup(argv)) but I think that would be ok 
+//make strdup of argv makes easier manage the free only for that I decide it to do it
 char *get_only_cmd(char *argv)
 {
     char *space;
@@ -65,7 +66,9 @@ char *get_only_cmd(char *argv)
         ft_strlcpy (cmd, argv, len + 1);
         return (cmd); //follow where to free cmd from here
     }
-    return (argv);
+    fprintf(stderr, "cmd_name in get_only_cmd is: %s\n", argv);//testing
+    cmd = ft_strdup(argv);
+    return (cmd);
 }
 
 #include <stdio.h>
@@ -346,6 +349,7 @@ void	execution(char	**nargv, char **const envp)
 //i begins in 2 which is the position of cmd1
 //will be check until argv[argc -2] which will be the last cmd before file2
 //argv[argc -1] is file2
+//free cmd_path at the end of each loop
 int check_cmd(int argc, char **argv, char **envp)
 {
     int i;
@@ -357,7 +361,6 @@ int check_cmd(int argc, char **argv, char **envp)
     {
         cmd_name = get_only_cmd(argv[i]);
 		cmd_path = find_path(cmd_name,envp);//new
-        //if (access(find_path(cmd_name, envp), X_OK) == -1)//pending fix parameters, needs to be the path
         if ((access(cmd_path, X_OK) == - 1))//new
 		{
             perror("cmd2 is not executable");
@@ -366,6 +369,7 @@ int check_cmd(int argc, char **argv, char **envp)
             return (-1);
         }
         i++;
+        free (cmd_path);//new
     }
     fprintf(stderr, "cmds passed initial check\n");//testing
 	return (0);
