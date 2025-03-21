@@ -370,10 +370,10 @@ int check_cmd(int argc, char **argv, char **envp)
 			free(cmd_path);//new
             return (-1);
         }
-        i++;
         free (cmd_path);//new
-        free (cmd_name);//new
+        i++;
     }
+    free (cmd_name);//new
     fprintf(stderr, "cmds passed initial check\n");//testing
 	return (0);
 }

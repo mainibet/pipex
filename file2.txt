@@ -1,1 +1,25 @@
-
+     1	actual_output.txt
+     2	apple.txt
+     3	cmd2_file2_test.txt
+     4	empty.txt
+     5	expected_output.txt
+     6	file0.txt
+     7	file1.txt
+     8	file2.txt
+     9	file3.txt
+    10	fulltest_pipex.sh
+    11	hi.txt
+    12	infile.txt
+    13	libft
+    14	main.c
+    15	Makefile
+    16	no_readable.txt
+    17	outfile.txt
+    18	output.txt
+    19	pipex
+    20	pipex.c
+    21	pipex.h
+    22	pipex.o
+    23	pipex.pdf
+    24	testing
+    25	test.txt
