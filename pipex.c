@@ -66,12 +66,25 @@ char *get_only_cmd(char *argv)
         ft_strlcpy (cmd, argv, len + 1);
         return (cmd); //follow where to free cmd from here
     }
+    else
+        cmd = ft_strdup(argv);//new
     fprintf(stderr, "cmd_name in get_only_cmd is: %s\n", argv);//testing
-    cmd = ft_strdup(argv);//new
-    return (cmd);
+        return (cmd);
 }
 
-#include <stdio.h>
+//clean-up memory if there was an error when 
+//creating the new arrary to exec
+void    free_memory (char **narg, int   j)
+{
+    while (j > 0)
+    {
+        free (narg[j - 1]);
+        j--;
+    }
+    free (narg);
+}
+
+#include <stdio.h>//testing
 
 //To find executables cmd1 or cmd2
 //file_pat is to hold the return
@@ -106,6 +119,12 @@ char	*find_path(char *argv, char **envp)
 		free (file_path);//new
 		i++;
 	}
+    i = 0;
+    while (dir[i])
+    {
+        free_memory(dir, i);
+        i++;
+    }
     free (dir);
 	return (NULL);
 }
@@ -187,17 +206,6 @@ int redir_output(int fd)
 //     else
 //         return (cmd_arg);//check where to free after use
 // }
-//clean-up memory if there was an error when 
-//creating the new arrary to exec
-void    free_memory (char **narg, int   j)
-{
-    while (j > 0)
-    {
-        free (narg[j - 1]);
-        j--;
-    }
-    free (narg);
-}
 //to create the new array for execution 
 //in case the cmd arg has multiple words
 //this means flags or parameteres
@@ -393,9 +401,9 @@ int check_cmd(int argc, char **argv, char **envp)
             return (-1);
         }
         free (cmd_path);//new
+        free (cmd_name);//new
         i++;
     }
-    free (cmd_name);//new
     fprintf(stderr, "cmds passed initial check\n");//testing
 	return (0);
 }
