@@ -103,7 +103,7 @@ char	*find_path(char *argv, char **envp)
 		perror("PATH env not found");
 		return (NULL);
 	}
-	dir = ft_split(path, ':');//check split free and errors
+	dir = ft_split(path, ':');
 	i = 0;
 	while (dir[i])
 	{
@@ -113,18 +113,20 @@ char	*find_path(char *argv, char **envp)
 		if (access (file_path, F_OK) == 0)
 		{	//just for testing
 			fprintf(stderr, "Path found for cmd: %s\n", file_path);//testing
-			free (dir);//new
+            //free (dir[i]);//new
+            while (dir[i])
+            {
+                free(dir[i]);
+                i++;
+            }
+            free (dir);//new
             return (file_path);//free in other place
 		}//for testing
+        free (dir[i]);//new
 		free (file_path);//new
 		i++;
 	}
-    i = 0;
-    while (dir[i])
-    {
-        free_memory(dir, i);
-        i++;
-    }
+    // free (dir[i]);
     free (dir);
 	return (NULL);
 }
@@ -393,10 +395,16 @@ int check_cmd(int argc, char **argv, char **envp)
     {
         cmd_name = get_only_cmd(argv[i]);
 		cmd_path = find_path(cmd_name,envp);//new
+        if (!cmd_path)
+        {
+            perror("Not path found");
+            free(cmd_name);
+            return (-1);
+        }
         if ((access(cmd_path, X_OK) == - 1))//new
 		{
             perror("cmd2 is not executable");
-			free(cmd_name);//new
+			free(cmd_name);
 			free(cmd_path);//new
             return (-1);
         }
