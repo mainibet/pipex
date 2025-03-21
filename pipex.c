@@ -217,6 +217,7 @@ char **new_arr_cmd(char *argv)
 }
 //duplicate cmd_arr to new_arr
 //cmd can't be free here because will be sed in exec_arg
+//free memory for the str created before the array failed
 char **dup_new_cmd (char **cmd)
 {
     size_t  len;
@@ -239,7 +240,7 @@ char **dup_new_cmd (char **cmd)
         if (!new_arg[i])
         {
             perror ("ft_strdup failed in the preocess of new_arg");
-            free_memory(new_arg, i);//check if is ok, 
+           // free_memory(new_arg, i);//check if is ok, 
             //check if the previos str where free
             return (NULL);
         }
@@ -286,8 +287,6 @@ char    **exec_arg(int argc, char **argv, int child_num)
             free (cmd);
             return (NULL);
         }
-        free_memory(cmd, count);//new
-        free (cmd);//free after dup
     }
     else if (ft_strchr(argv[argc - 2], ' ') && child_num == 2)
     {
@@ -308,8 +307,6 @@ char    **exec_arg(int argc, char **argv, int child_num)
             free (cmd);
             return (NULL);
         }
- //       free_memory(cmd, count);//new
-  //      free (cmd);
     }
     else
     {
@@ -342,6 +339,7 @@ void	execution(char	**nargv, char **const envp)
     fprintf(stderr, "\n\n\nEXECUTION WILL BEGIN\n");//testing
     char    *cmd_name;
     char    *cmd_path;
+    size_t  count;
 
     cmd_name = get_only_cmd(nargv[0]);
     fprintf(stderr, "cmd_name is: %s\n", cmd_name);//testing
@@ -349,15 +347,21 @@ void	execution(char	**nargv, char **const envp)
     if (!cmd_path)
     {
         perror ("command_path not found");//check if previous mallocs needs to be free here
+        free(cmd_name);
+        free (nargv);
         exit(EXIT_FAILURE);
     }
     fprintf(stderr, "cmd_path found for execution: %s\n", cmd_path);//testing
     fprintf(stderr, "Execution of cmd[%s] will begin\n", cmd_name);//testing
     fprintf(stderr, "Will be used this as nargv: %s and %s\n", nargv[0], nargv[1]);//testing
+    count = 0;
+    while (nargv[count])//new
+            count++;//new
     execve(cmd_path, nargv, envp);
     perror ("execve failed");
-    free (cmd_path);//check if previous mallocs needs to be free here
 	free (cmd_name);//new
+    free (cmd_path);//check if previous mallocs needs to be free here
+    free_memory(nargv, count);
     free (nargv);//new
     exit (EXIT_FAILURE);
 }
