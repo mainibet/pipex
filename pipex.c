@@ -187,7 +187,8 @@ char *get_narg(char *argv)
     else
         return (cmd_arg);//check where to free after use
 }
-//clean-up memory if there was an error when creating the new arrary to exec
+//clean-up memory if there was an error when 
+//creating the new arrary to exec
 void    free_memory (char **narg, int   j)
 {
     while (j > 0)
@@ -197,7 +198,8 @@ void    free_memory (char **narg, int   j)
     }
     free (narg);
 }
-//to create the new array for execution in case the cmd arg has multiple words
+//to create the new array for execution 
+//in case the cmd arg has multiple words
 //this means flags or parameteres
 char **new_arr_cmd(char *argv)
 {
@@ -205,7 +207,7 @@ char **new_arr_cmd(char *argv)
     size_t  len;
     
     len = 0;
-    cmd = ft_split(argv, ' ');//pending handling error the other function with split
+    cmd = ft_split(argv, ' ');
     if (!cmd)
     {
         perror("malloc failed in ft_split");
@@ -214,6 +216,7 @@ char **new_arr_cmd(char *argv)
     return (cmd);
 }
 //duplicate cmd_arr to new_arr
+//cmd can't be free here because will be sed in exec_arg
 char **dup_new_cmd (char **cmd)
 {
     size_t  len;
@@ -236,13 +239,14 @@ char **dup_new_cmd (char **cmd)
         if (!new_arg[i])
         {
             perror ("ft_strdup failed in the preocess of new_arg");
-            free_memory(new_arg, i);//check if is ok, check if the previos str where free
+            free_memory(new_arg, i);//check if is ok, 
+            //check if the previos str where free
             return (NULL);
         }
         i++;
     }
     new_arg[len] = NULL;
-    return (new_arg);
+    return (new_arg);//follow from here
 }
 //function to get the right args for execution
 //I'm not using strdup because I understan args won't change CHECK THIS
@@ -261,6 +265,7 @@ char    **exec_arg(int argc, char **argv, int child_num)
     fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");//testing
     char    **cmd;
     char    **new_arg;
+    size_t  count;//new
 
     if (ft_strchr(argv[2], ' ') && child_num == 1)
     {
@@ -270,13 +275,18 @@ char    **exec_arg(int argc, char **argv, int child_num)
             perror("error getting new_arr_cmd in exec_arg");
             return (NULL);
         }
+        count = 0;//new
+        while (cmd[count])//new
+            count++;//new
         new_arg = dup_new_cmd(cmd);
         if (!new_arg)
         {
             perror ("malloc failed in exec_arg");
+            free_memory(cmd, count);//new
             free (cmd);
             return (NULL);
         }
+        free_memory(cmd, count);//new
         free (cmd);//free after dup
     }
     else if (ft_strchr(argv[argc - 2], ' ') && child_num == 2)
@@ -287,18 +297,23 @@ char    **exec_arg(int argc, char **argv, int child_num)
             perror("error getting new_arr_cmd in exec_arg");
             return (NULL);
         }
+        count = 0;//new
+        while (cmd[count])//new
+            count++;//new
         new_arg = dup_new_cmd(cmd);
         if (!new_arg)
         {
             perror ("malloc failed in exec_arg");
+            free_memory(cmd, count);
             free (cmd);
             return (NULL);
         }
-        free (cmd);//free after dup
+ //       free_memory(cmd, count);//new
+  //      free (cmd);
     }
     else
     {
-        new_arg = malloc (sizeof(char *) * (2));//check later to free
+        new_arg = malloc (sizeof(char *) * (2));
         if (!new_arg)
         {
             perror ("malloc failed in exec_arg");
@@ -306,9 +321,9 @@ char    **exec_arg(int argc, char **argv, int child_num)
         }
         new_arg[1] = NULL;
         if (child_num == 1)
-           new_arg[0] = argv[2];
+           new_arg[0] = argv[2];//check if this is valir or if need strdup
         else if (child_num == 2)
-          new_arg[0] = argv[argc - 2];
+          new_arg[0] = argv[argc - 2];//check if this is valir or if need strdup
         new_arg[1] = NULL;
     }
     return (new_arg);//check later where to free after use
