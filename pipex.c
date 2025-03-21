@@ -67,7 +67,7 @@ char *get_only_cmd(char *argv)
         return (cmd); //follow where to free cmd from here
     }
     fprintf(stderr, "cmd_name in get_only_cmd is: %s\n", argv);//testing
-    cmd = ft_strdup(argv);
+    cmd = ft_strdup(argv);//new
     return (cmd);
 }
 
@@ -100,11 +100,13 @@ char	*find_path(char *argv, char **envp)
 		if (access (file_path, F_OK) == 0)
 		{	//just for testing
 			fprintf(stderr, "Path found for cmd: %s\n", file_path);//testing
-			return (file_path);//free in other place
+			free (dir);//new
+            return (file_path);//free in other place
 		}//for testing
-		//free (file_path);//check position to free path that wont be return 
+		free (file_path);//new
 		i++;
 	}
+    free (dir);
 	return (NULL);
 }
 /*
@@ -370,6 +372,7 @@ int check_cmd(int argc, char **argv, char **envp)
         }
         i++;
         free (cmd_path);//new
+        free (cmd_name);//new
     }
     fprintf(stderr, "cmds passed initial check\n");//testing
 	return (0);
