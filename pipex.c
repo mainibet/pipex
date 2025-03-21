@@ -352,15 +352,21 @@ int check_cmd(int argc, char **argv, char **envp)
     while (i < argc - 1)
     {
         cmd_name = get_only_cmd(argv[i]);
-        if (access(find_path(cmd_name, envp), X_OK) == -1)//pending fix parameters, needs to be the path
-        {
+								cmd_path = find_path(cmd_name,envp);//new
+        //if (access(find_path(cmd_name, envp), X_OK) == -1)//pending fix parameters, needs to be the path
+        if (access(cmd_path), X_OK) == - 1)//new
+								{
             perror("cmd2 is not executable");
+												free(cmd_name);//new
+												free(cmd_path);//new
             return (1);
         }
         i++;
     }
     fprintf(stderr, "cmds passed initial check\n");//testing
-    return (0);
+    free(cmd_name);//new
+				free(cmd_path);//new
+				return (0);
 }
 
 //initial check
