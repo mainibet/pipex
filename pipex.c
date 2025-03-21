@@ -173,20 +173,20 @@ int redir_output(int fd)
     close_fd(fd);//this will be file2 or pipfed[1] after dup2
     return (0);
 }
-//find the arg with the cmd and duplicate it to include it later in the new array as argv[[0]]
-char *get_narg(char *argv)
-{
-    char    *cmd_arg;
+// //find the arg with the cmd and duplicate it to include it later in the new array as argv[[0]]
+// char *get_narg(char *argv)
+// {
+//     char    *cmd_arg;
 
-    cmd_arg = ft_strdup(argv);
-    if (!cmd_arg)
-    {
-        perror ("strdup failed in get_arg");
-        return (NULL);//because it failed
-    }
-    else
-        return (cmd_arg);//check where to free after use
-}
+//     cmd_arg = ft_strdup(argv);
+//     if (!cmd_arg)
+//     {
+//         perror ("strdup failed in get_arg");
+//         return (NULL);//because it failed
+//     }
+//     else
+//         return (cmd_arg);//check where to free after use
+// }
 //clean-up memory if there was an error when 
 //creating the new arrary to exec
 void    free_memory (char **narg, int   j)
@@ -240,8 +240,7 @@ char **dup_new_cmd (char **cmd)
         if (!new_arg[i])
         {
             perror ("ft_strdup failed in the preocess of new_arg");
-           // free_memory(new_arg, i);//check if is ok, 
-            //check if the previos str where free
+            free_memory(new_arg, i);
             return (NULL);
         }
         i++;
@@ -348,6 +347,10 @@ void	execution(char	**nargv, char **const envp)
     {
         perror ("command_path not found");//check if previous mallocs needs to be free here
         free(cmd_name);
+        count = 0;
+        while (nargv[count])//new
+                count++;//new
+        free_memory(nargv, count);//new
         free (nargv);
         exit(EXIT_FAILURE);
     }
@@ -361,7 +364,7 @@ void	execution(char	**nargv, char **const envp)
     perror ("execve failed");
 	free (cmd_name);//new
     free (cmd_path);//check if previous mallocs needs to be free here
-    free_memory(nargv, count);
+    free_memory(nargv, count);//new
     free (nargv);//new
     exit (EXIT_FAILURE);
 }
