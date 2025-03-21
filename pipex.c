@@ -8,6 +8,11 @@ char	*get_path_env(char **envp)
 {
 	int	i;
 
+    if (!envp || !envp[0])
+    {
+        fprintf(stderr, "Error: no environment variables available.\n");//testing
+        return (NULL);
+    }
 	i = 0;
 	while (envp[i])
 	{
@@ -55,14 +60,10 @@ char *get_only_cmd(char *argv)
         if (!cmd)
         {
             perror ("Malloc failed to get only cmd");
-            free (cmd);
             return (NULL);
         }
-        if (cmd)
-        {
-            ft_strlcpy (cmd, argv, len + 1);
-            return (cmd); //follow where to free cmd from here
-        }
+        ft_strlcpy (cmd, argv, len + 1);
+        return (cmd); //follow where to free cmd from here
     }
     return (argv);
 }
@@ -98,7 +99,7 @@ char	*find_path(char *argv, char **envp)
 			fprintf(stderr, "Path found for cmd: %s\n", file_path);//testing
 			return (file_path);//free in other place
 		}//for testing
-		free (file_path);//check position to free path that wont be return 
+		//free (file_path);//check position to free path that wont be return 
 		i++;
 	}
 	return (NULL);
@@ -336,8 +337,10 @@ void	execution(char	**nargv, char **const envp)
     execve(cmd_path, nargv, envp);
     perror ("execve failed");
     free (cmd_path);//check if previous mallocs needs to be free here
-	exit (EXIT_FAILURE);
-}//  free(cmd_path);// //check if previous mallocs needs to be free here. is free ok?
+	free (cmd_name);//new
+    free (nargv);//new
+    exit (EXIT_FAILURE);
+}
 
 #include <stdio.h> //just for testing
 //i begins in 2 which is the position of cmd1
@@ -347,26 +350,25 @@ int check_cmd(int argc, char **argv, char **envp)
 {
     int i;
     char    *cmd_name;
+    char    *cmd_path;//new
 
     i = 2;
     while (i < argc - 1)
     {
         cmd_name = get_only_cmd(argv[i]);
-								cmd_path = find_path(cmd_name,envp);//new
+		cmd_path = find_path(cmd_name,envp);//new
         //if (access(find_path(cmd_name, envp), X_OK) == -1)//pending fix parameters, needs to be the path
-        if (access(cmd_path), X_OK) == - 1)//new
-								{
+        if ((access(cmd_path, X_OK) == - 1))//new
+		{
             perror("cmd2 is not executable");
-												free(cmd_name);//new
-												free(cmd_path);//new
-            return (1);
+			free(cmd_name);//new
+			free(cmd_path);//new
+            return (-1);
         }
         i++;
     }
     fprintf(stderr, "cmds passed initial check\n");//testing
-    free(cmd_name);//new
-				free(cmd_path);//new
-				return (0);
+	return (0);
 }
 
 //initial check
