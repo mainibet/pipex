@@ -673,6 +673,7 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
 //open_fd will do the initial check of all arg and open file1 and file2
 //fd[0] is file1
 //fd[1] is file2
+//at the end closed std fd
 int	main(int argc, char **argv, char **envp)
 {
     int pipefd[2];//check if norminette is happy with this
@@ -692,5 +693,8 @@ int	main(int argc, char **argv, char **envp)
     }
     parent(argc, pipefd, argv, envp, fd);
     fprintf(stderr, "\n\n\nPROGRAM FINISHED\n\n\n");
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
     return (0);
 }
