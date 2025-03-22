@@ -472,10 +472,10 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     close_fd(pipefd[0]);
     close_fd(fd[1]);//NEW
 	if ((fd_dup = redir_input(fd[0])) < 0)
-        {
-            perror("Failed redirection input in child1");
-            exit(1);
-        }
+    {
+        perror("Failed redirection input in child1");
+        exit(1);
+    }
     fprintf(stderr, "redirection INPUT child1  good\n");//testing
     if ((pipefd_dup = redir_output(pipefd[1])) < 0)
     {
