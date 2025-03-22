@@ -489,8 +489,8 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     if (!nargv)
     {
         perror ("Failed to create neww array with arg before execution");
-        close_fd(fd_dup);
         close_fd(pipefd_dup);
+        close_fd(fd_dup);
         exit(1);
     }
     fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
@@ -500,6 +500,10 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     free(nargv);
     close_fd(fd_dup);
     close_fd(pipefd_dup);
+    close_fd(fd[1]);//NEW
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
     exit (1);
 }
 
@@ -549,6 +553,9 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     free (nargv);
     close_fd(pipefd_dup);
     close_fd(fd_dup);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
     exit(1);
 }
 
@@ -562,11 +569,19 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette is happy with this
 {
     if (ini_check(argc, argv, envp) < 0)
+    {
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
         return (-1);
+    }
     fd[0] = open(argv[1], O_RDONLY);
     if (fd[0] == - 1)
 	{
 	    perror ("Error opening file1");
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
 		return (-1);
 	}
     fd[1] = open(argv[argc - 1], O_WRONLY);
@@ -574,6 +589,9 @@ int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette 
     {
         perror ("Error opening file2");
         close_fd(fd[0]);
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
         return (-1);//check if this is valid
     }
     fprintf(stderr, "Successfully opened\n");//testing
