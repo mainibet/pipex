@@ -643,10 +643,10 @@ if (ini_check(argc, argv, envp) < 0)
     if (pid1 == - 1)
     {
         perror ("Fork failed for child1");
-        close_fd(fd[0]);//NEW
+        close_fd(fd_in);//NEW
         fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-        close_fd(fd[1]);//NEW
-        fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
+        //close_fd(fd[1]);//NEW
+        //fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
         close_fd(pipefd[0]);//NEW
         fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
         close_fd(pipefd[1]);//NEW
@@ -659,10 +659,10 @@ if (ini_check(argc, argv, envp) < 0)
     if (pid2 == -1)
     {
         perror ("Fork failed for child2");
-        close_fd(fd[0]);//NEW
+        close_fd(fd_in);//NEW
         fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-        close_fd(fd[1]);//NEW
-        fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
+        //close_fd(fd[1]);//NEW
+        //fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
         close_fd(pipefd[0]);//NEW
         fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
         close_fd(pipefd[1]);//NEW
@@ -673,10 +673,10 @@ if (ini_check(argc, argv, envp) < 0)
     else if (pid2 == 0)
         child2(argc, pipefd, argv, envp, fd_in);
     fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
-    close_fd(fd[0]);
+    close_fd(fd_in);
     fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-    close_fd(fd[1]);
-    fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
+    //close_fd(fd[1]);
+    //fprintf(stderr, "Closed correctly fd[1] which is file2\n");//testing
     close_fd(pipefd[0]);
     fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
     close_fd(pipefd[1]);
