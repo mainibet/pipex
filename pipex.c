@@ -706,13 +706,13 @@ if (ini_check(argc, argv, envp) < 0)
 int	main(int argc, char **argv, char **envp)
 {
     int pipefd[2];//check if norminette is happy with this
-    int fd[2];
+    //int fd[2];
     
     ft_printf("argc including the program: %d\n", argc);//testing
     if (argc != 5)
         return (ft_printf("include 4 args\n"), 1);
-    if (open_fd(argc, argv, envp, fd) == -1)
-        return (1);
+    //if (open_fd(argc, argv, envp, fd) == -1)
+        //return (1);
     if (pipe(pipefd) == - 1)
     {
         perror("pipe failed");
@@ -720,10 +720,11 @@ int	main(int argc, char **argv, char **envp)
         close_fd(fd[1]);
         exit (EXIT_FAILURE);
     }
-    parent(argc, pipefd, argv, envp, fd);
+    //parent(argc, pipefd, argv, envp, fd);
+				parent(argc, pipefd, argv, envp);
     fprintf(stderr, "\n\n\nPROGRAM FINISHED\n\n\n");
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
+    //close(STDIN_FILENO);
+    //close(STDOUT_FILENO);
+    //close(STDERR_FILENO);
     return (0);
 }
