@@ -420,9 +420,15 @@ int check_cmd(int argc, char **argv, char **envp)
 //check if file 1 has read permissions
 //check if file 2 has write permissions
 //check if cmds are executables
+//file2 not need ti exit when calling tge program 
+//if doesn't exist needs to be created
+//O_TRUNC truncates the file, over wrtes the one
+//gives it the permissions 0644: rw-r--r--
 int	ini_check(int argc, char **argv, char **envp)
 {
-	if ((access(argv[1], F_OK) == -1) || (access(argv[argc - 1], F_OK) == -1))//to check if the file2 exist
+	int fd_out;
+	//if ((access(argv[1], F_OK) == -1) || (access(argv[argc - 1], F_OK) == -1))//to check if the file2 exist
+	if (access(argv[1], F_OK) == - 1)
 	{
 		perror("At least 1 file doesn't exist");
 		return (-1);
@@ -432,17 +438,19 @@ int	ini_check(int argc, char **argv, char **envp)
 		perror("No read permissions for file1");
 		return (-1);
 	}
-    if (access(argv[argc - 1], W_OK) == - 1)
-    {
-        perror ("No write permissions for file2");
-        return (-1);
-    }
-    fprintf(stderr, "File1 and file2 passed initial check\n");//testing
-    if (check_cmd(argc, argv, envp) != 0)
-    {
-        perror("Non executable command");
-        return (-1);
-    }
+ fprintf(stderr, "File1 passed initial check\n");//testing
+ if (check_cmd(argc, argv, envp) != 0)
+ {
+     perror("Non executable command");
+     return (-1);
+		}
+		fd_out = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (fd_out == - 1)
+		{
+		  perror ("open output file");
+				return (- 1);
+				}
+	close_fd(fd_out);
 	return (0);
 }
 //process for cmd1 (FORK1)
