@@ -586,7 +586,7 @@ int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette 
 		return (-1);
 	}
     fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd[1] == -1)
+	if (fd[1] == -1)//now this is made in child2 and tge open 
     {
         perror ("Error opening file2");
         close_fd(fd[0]);
@@ -619,13 +619,23 @@ int wait_child(pid_t  pid, int *status)
 //pid == 0 means we are in child process
 //pid > 0 means we are in the parent process
 //fork() returns -1 if something fails
-int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
+//int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
+int parent(int argc, int *pipefd, char **argv, char **envp)
 {
     pid_t   pid1;
     pid_t   pid2;
     int status1;
     int status2;
+				int fd_in;
 
+if (ini_check(argc, argv, envp) < 0)
+        return (-1);
+    fd_in = open(argv[1], O_RDONLY);
+    if (fd_in == - 1)
+	{
+	    perror ("Error opening file1");
+		return (-1);
+	}
     pid1 = fork();
     if (pid1 == - 1)
     {
@@ -641,7 +651,7 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
         return (-1);
     }
     else if (pid1 == 0)
-        child1(argc, pipefd, argv, envp, fd);
+        child1(argc, pipefd, argv, envp, fd_in);
     pid2 = fork();
     if (pid2 == -1)
     {
@@ -658,7 +668,7 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
         return (-1);
     }
     else if (pid2 == 0)
-        child2(argc, pipefd, argv, envp, fd);
+        child2(argc, pipefd, argv, envp, fd_in);
     fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
     close_fd(fd[0]);
     fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
