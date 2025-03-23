@@ -462,7 +462,7 @@ int	ini_check(int argc, char **argv, char **envp)
 //can't be free, needs to be close in the parent and the child close it automatically
 //if fails needs to exit(1) to stop the process and go back to the parent
 //void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
-void child1(int argc, char **argv, char **envp, int *pipefd, int fd[0])//new without fd[2] CALL IT GOOD IN PARENT
+void child1(int argc, char **argv, char **envp, int *pipefd, int fd_int)//new without fd[2] CALL IT GOOD IN PARENT
 {
     fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     char **nargv;
@@ -472,7 +472,7 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd[0])//new wit
     
     close_fd(pipefd[0]);
     //close_fd(fd[1]);//NEW
-	if ((fd_dup = redir_input(fd[0])) < 0)
+	if ((fd_dup = redir_input(fd_in)) < 0)
     {
         perror("Failed redirection input in child1");
         exit(1);
@@ -501,10 +501,10 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd[0])//new wit
     free(nargv);
     close_fd(fd_dup);
     close_fd(pipefd_dup);
-    close_fd(fd[1]);//NEW
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
+    //close_fd(fd[1]);//NEW
+    //close(STDIN_FILENO);
+    //close(STDOUT_FILENO);
+    //close(STDERR_FILENO);
     exit (1);
 }
 
