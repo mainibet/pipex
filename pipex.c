@@ -575,33 +575,23 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette is happy with this
 {
     if (ini_check(argc, argv, envp) < 0)
-    {
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
         return (-1);
-    }
     fd[0] = open(argv[1], O_RDONLY);
     if (fd[0] == - 1)
 	{
 	    perror ("Error opening file1");
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
 		return (-1);
 	}
-    fd[1] = open(argv[argc - 1], O_WRONLY);
+    fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd[1] == -1)
     {
         perror ("Error opening file2");
         close_fd(fd[0]);
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
         return (-1);//check if this is valid
     }
     fprintf(stderr, "Successfully opened\n");//testing
-    return (0);
+    close_fd(fd[1]);
+				return (0);
 }
 //parent function to do the fork() for the child processess
 int wait_child(pid_t  pid, int *status)
