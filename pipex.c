@@ -426,7 +426,6 @@ int check_cmd(int argc, char **argv, char **envp)
 //gives it the permissions 0644: rw-r--r--
 int	ini_check(int argc, char **argv, char **envp)
 {
-	int fd_out;
 	//if ((access(argv[1], F_OK) == -1) || (access(argv[argc - 1], F_OK) == -1))//to check if the file2 exist
 	if (access(argv[1], F_OK) == - 1)
 	{
@@ -444,13 +443,6 @@ int	ini_check(int argc, char **argv, char **envp)
      perror("Non executable command");
      return (-1);
 		}
-		fd_out = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (fd_out == - 1)
-		{
-		  perror ("open output file");
-				return (- 1);
-				}
-	close_fd(fd_out);
 	return (0);
 }
 //process for cmd1 (FORK1)
@@ -478,7 +470,7 @@ void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     int child_num;
     
     close_fd(pipefd[0]);
-    close_fd(fd[1]);//NEW
+    //close_fd(fd[1]);//NEW
 	if ((fd_dup = redir_input(fd[0])) < 0)
     {
         perror("Failed redirection input in child1");
@@ -532,6 +524,12 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 
     close(pipefd[1]);
     close(fd[0]);//NEW
+				fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);//new
+		  if (fd[1] == - 1)//new
+		  {
+		    perror ("open output file");//new
+				  exit (- 1);//new
+				}
     if ((pipefd_dup = redir_input(pipefd[0])) < 0)
     {
         perror("Failed redirection input in child2");
