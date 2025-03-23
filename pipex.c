@@ -461,7 +461,8 @@ int	ini_check(int argc, char **argv, char **envp)
 //If the execution succees pipefd[1] can't manually be closed in the child1 and nargv 
 //can't be free, needs to be close in the parent and the child close it automatically
 //if fails needs to exit(1) to stop the process and go back to the parent
-void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
+//void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
+void child1(int argc, char **argv, char **envp, int *pipefd, int fd[0])//new without fd[2] CALL IT GOOD IN PARENT
 {
     fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     char **nargv;
