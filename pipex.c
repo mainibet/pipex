@@ -575,6 +575,7 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd_in)//new
 //Then open file2 to be use in child2 in redir cmd2 output
 //fd[0] is file1
 //fd[1] is file2
+/*
 int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette is happy with this
 {
     if (ini_check(argc, argv, envp) < 0)
@@ -596,6 +597,7 @@ int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette 
     close_fd(fd[1]);
 				return (0);
 }
+*/
 //parent function to do the fork() for the child processess
 int wait_child(pid_t  pid, int *status)
 {
