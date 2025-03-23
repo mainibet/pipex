@@ -515,18 +515,20 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_int)//new wi
 //After all the reirection will be done the execution
 //First redir input from pipe to cmd2
 //then redirection output from cmd2 to file2
-void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
+//void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
+void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd_in)//new
 {
     fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
     char **nargv;
     int fd_dup;
     int pipefd_dup;
     int child_num;
+				int fd_out;//new
 
     close(pipefd[1]);
-    close(fd[0]);//NEW
-				fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);//new
-		  if (fd[1] == - 1)//new
+    close(fd_in);//NEW
+				fd_out = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);//new
+		  if (fd_out == - 1)//new
 		  {
 		    perror ("open output file");//new
 				  exit (- 1);//new
@@ -537,7 +539,7 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
         exit(1);
     }
     fprintf(stderr, "redirection INPUT child2  good\n");//testing
-    if ((fd_dup = redir_output(fd[1])) < 0)
+    if ((fd_dup = redir_output(fd_out)) < 0)
     {
         close_fd(pipefd_dup);
         perror ("Failed redirection OUTPUT in child2");
@@ -560,9 +562,9 @@ void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
     free (nargv);
     close_fd(pipefd_dup);
     close_fd(fd_dup);
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
+    //close(STDIN_FILENO);
+    //close(STDOUT_FILENO);
+    //close(STDERR_FILENO);
     exit(1);
 }
 
