@@ -84,6 +84,17 @@ int	parent(struct s_pipe_data *data)
 	return (0);
 }
 
+int	setup_pipe(int pipefd[2], int fd_in)
+{
+	if (pipe(pipefd) == -1)
+	{
+		perror("pipe failed");
+		close_fd(fd_in);
+		return (-1);
+	}
+	return (0);
+}
+
 int	main(int argc, char **argv, char **envp)
 {
 	t_pipe_data	data;
@@ -97,15 +108,11 @@ int	main(int argc, char **argv, char **envp)
 	fd_in = open(argv[1], O_RDONLY);
 	if (fd_in == -1)
 	{
-		perror ("Error opening file1");
+		perror ("Error opening input file");
 		return (-1);
 	}
-	if (pipe(pipefd) == -1)
-	{
-		perror("pipe failed");
-		close_fd(fd_in);
+	if (setup_pipe(pipefd, fd_in) == -1)
 		return (-1);
-	}
 	data.argc = argc;
 	data.argv = argv;
 	data.envp = envp;
