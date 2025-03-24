@@ -624,7 +624,8 @@ int fork_error(int fd_in, int *pipefd)
 //pid == 0 means we are in child process
 //pid > 0 means we are in the parent process
 //fork() returns -1 if something fails
-int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
+//int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
+int parent(s_pipe_data *data)//new
 {
     pid_t   pid1;
     pid_t   pid2;
@@ -635,20 +636,24 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
     if (pid1 == - 1)
     {
         perror ("Fork failed for child1");
-        return (fork_error(fd_in, pipefd));
+        //return (fork_error(fd_in, pipefd));
+        return (fork_error(data->fd_in, data->pipefd));//new
     }
     else if (pid1 == 0)
-        child1(argc, argv, envp, pipefd, fd_in);
+        //child1(argc, argv, envp, pipefd, fd_in);
+        child1(data);//new
     pid2 = fork();
     if (pid2 == -1)
     {
         perror ("Fork failed for child2");
         if (wait_child(pid1, &status1) == -1)//new
             perror("Error waiting child1");//new
-        return (fork_error(fd_in, pipefd));
+        //return (fork_error(fd_in, pipefd));
+        return (fork_error(data->fd_in, data->pipefd));
     }
     else if (pid2 == 0)
-        child2(argc, argv, envp, pipefd, fd_in);
+        //child2(argc, argv, envp, pipefd, fd_in);
+        child2(data);//new
     fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
     close_fd(fd_in);
     fprintf(stderr, "Closed correctly fd_in which is file1\n");//testing
