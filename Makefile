@@ -19,17 +19,18 @@ LIBFT_LIB = $(LIBFT_DIR)/libft.a
 
 NAME = pipex
 
-# SRC =  main.c # this is for testing libft and ft_printf
-SRC = pipex.c # this is for my development
+SRC = pipex.c util_ini.c util_child.c util_exec.c util_other.c
 
 OBJ = $(SRC:.c=.o)
 
 all: $(NAME)
 
+# Link object files and libft to create the executable
 $(NAME): $(OBJ) $(LIBFT_LIB)
 	$(CC) $(CFLAGS) $(OBJ) -L$(LIBFT_DIR) -lft -o $@
 
-$(LIBFT_LIB): # Rule to build libft if it doesn't exist
+# Rule to build libft if it doesn't exist
+$(LIBFT_LIB): 
 	$(MAKE) -C $(LIBFT_DIR)
 
 %.o: %.c

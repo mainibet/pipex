@@ -1,0 +1,106 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   util_child.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: albetanc <albetanc@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/24 17:58:59 by albetanc          #+#    #+#             */
+/*   Updated: 2025/03/24 17:59:01 by albetanc         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "pipex.h"
+#include <stdio.h> //just for testing
+
+//to redirect input from file1 to cmd1 and from pipe[0] to cmd2
+//fd is the one that will be duplicated (file1 or pipefd[0])
+//fd_dup is the fd that cmd will use
+int	redir_input(int fd)
+{
+	int	fd_dup;
+
+	fd_dup = dup2(fd, STDIN_FILENO);
+	if (fd_dup == - 1)
+	{
+		perror ("Dup2 in redir_input");
+        close_fd (fd);//NEW
+		return (1);
+	}
+	fprintf(stderr, "Successfull redirection\n");//testing in stderr to see it in terminal
+    close_fd(fd);
+	return (0);
+}
+
+//to redirect output pipefd[1] nad file2
+//fd is the one duplicated
+//fd_dup is the one that cmd will use
+//fd is the one parameter can be pipefd[1] or file2
+int redir_output(int fd)
+{
+    fprintf(stderr, "Now will begin redir_output to file2\n");//testing
+    int fd_dup;
+    
+    fd_dup = dup2(fd, STDOUT_FILENO);
+    if (fd_dup == -1)
+    {
+        perror ("Dup2 in redir_output");
+        close_fd(fd);
+        return (1);
+    }
+    fprintf(stderr, "Successfull redirection\n");//testing
+    close_fd(fd);
+    return (0);
+}
+
+//will be used for child1 and child2
+//to call redirections and handle errors in it if needed
+int setup_redir(int input_fd, int output_fd, t_fd_dup *dup)//new
+{
+    int fd_in_dup;
+    int fd_out_dup;
+
+    if ((fd_in_dup = redir_input(input_fd)) < 0)
+    {
+        perror("Failed redir_input");
+        return (-1);
+    }
+    fprintf(stderr, "redirection INPUT good\n");//test
+    if((fd_out_dup = redir_output(output_fd)) < 0)
+    {
+        close_fd(fd_in_dup);
+        perror("Failed redirection OUTPUT");
+        return (-1);
+    }
+    fprintf(stderr, "Redirection output good\n");
+    dup -> input_dup = fd_in_dup;
+    dup -> output_dup = fd_out_dup;
+    return 0;
+}
+
+//execution process for child1 and child2
+void    child_process(t_pipe_data *data, t_initial_fd *fd, int child_num)
+{
+    char **nargv;
+    t_fd_dup    dup;
+
+    if (setup_redir(fd -> input_fd, fd -> output_fd, &dup) != 0)
+    exit(1);
+    nargv = exec_arg(data -> argc, data -> argv, child_num);
+    if (!nargv)
+    {
+        perror ("nargv before execution");
+        close_fd(dup.input_dup);//new
+        close_fd(dup.output_dup);//new
+        exit(1);
+    }
+    fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
+    fprintf(stderr, "We are in child1 about to call execution\n");//testing
+    execution(nargv, data -> envp);
+    perror ("Execution failed in child 1");
+    free(nargv);
+    close_fd(dup.input_dup);//new
+    close_fd(dup.output_dup);//new
+    exit(1);
+}
+
