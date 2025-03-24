@@ -21,5 +21,6 @@ pipex.c
 pipex.h
 pipex.o
 pipex.pdf
+testf.txt
 testing
 test.txt
