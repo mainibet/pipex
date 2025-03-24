@@ -20,14 +20,14 @@
 # include <sys/wait.h>//to waitpid() and wait() fork() includes macros WIFEXITED and WEXITSTATUS
 
 //struct definition
-typedef struct
+typedef struct s_pipe_data
 {
     int argc;
     char **argv;
     char **envp;
     int *pipefd;
     int fd_in;
-}s_pipe_data
+}t_pipe_data
 
 //function ptototype
 

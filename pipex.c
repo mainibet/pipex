@@ -463,7 +463,7 @@ int	ini_check(int argc, char **argv, char **envp)
 //if fails needs to exit(1) to stop the process and go back to the parent
 //void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 //void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new without fd[2] CALL IT GOOD IN PARENT
-void    child1(struct s_pipe_data *data)//check norm
+void    child1(t_pipe_data *data)//check norm
 {
     fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     char **nargv;
@@ -512,7 +512,7 @@ void    child1(struct s_pipe_data *data)//check norm
 //First redir input from pipe to cmd2
 //then redirection output from cmd2 to file2
 //void child2 (int argc, char **argv, char **envp, int  *pipefd, int fd_in)
-void    child2 (struct s_pipe_data *data)//new
+void    child2 (t_pipe_data *data)//new
 {
     fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
     char **nargv;
@@ -688,7 +688,7 @@ int	main(int argc, char **argv, char **envp)
 {
     int pipefd[2];
     int fd_in;
-    struct s_pipe_data data;//check norm
+    t_pipe_data data;//check norm
 				
     ft_printf("argc including the program: %d\n", argc);//testing
     if (argc != 5)
