@@ -367,13 +367,13 @@ void	execution(char	**nargv, char **const envp)
     fprintf(stderr, "cmd_path found for execution: %s\n", cmd_path);//testing
     fprintf(stderr, "Execution of cmd[%s] will begin\n", cmd_name);//testing
     fprintf(stderr, "Will be used this as nargv: %s and %s\n", nargv[0], nargv[1]);//testing
-    count = 0;
-    while (nargv[count])
-            count++;
     execve(cmd_path, nargv, envp);
     perror ("execve failed");
 	free (cmd_name);
     free (cmd_path);
+    count = 0;
+    while (nargv[count])
+            count++;
     free_memory(nargv, count);
     free (nargv);
     exit (EXIT_FAILURE);
@@ -445,6 +445,28 @@ int	ini_check(int argc, char **argv, char **envp)
             }
         return (0);
 }
+//will be used for child1 and child2
+int setup_redir(t_pipe_data *data, int input_fd, int output_fd)//new
+{
+    int fd_in_dup;
+    int fd_out_dup;
+
+    if ((fd_dup_in = redir_input(input_fd)) < 0)
+    {
+        perror("Failed redir_input");
+        return (-1);
+    }
+    fprintf(stderr, "redirection INPUT good\n");//test
+    if((fd_out_dup = redir_output(output_fd)) < 0)
+    {
+        close_fd(fd_in_dup);
+        perror("Failed redirection OUTPUT");
+        return (-1);
+    }
+    fprintf(stderr, "Redirection output good\n");
+    return 0;
+}
+
 //process for cmd1 (FORK1)
 //Function void because it succees or exit to go back to the parent, doesn't return
 //*nargv is the new array of arguments needed for execution
@@ -519,7 +541,7 @@ void    child2 (t_pipe_data *data)//new
     int fd_dup;
     int pipefd_dup;
     int child_num;
-	int fd_out;//new
+	int fd_out;
 
     close(data -> pipefd[1]);
     close(data -> fd_in);
@@ -553,6 +575,7 @@ void    child2 (t_pipe_data *data)//new
     }
     fprintf(stderr, "This is the NEW ARRAY in child2 of arg: %s\n\n\n", *nargv);//testing
     fprintf(stderr, "We are in child2 about to call execution\n");//testing
+    fprintf(stderr, "%s\n", *nargv);//test
     execution(nargv, data -> envp);
     perror ("Execution failed in child2");
     free (nargv);
@@ -626,8 +649,7 @@ int fork_error(int fd_in, int *pipefd)
 //pid == 0 means we are in child process
 //pid > 0 means we are in the parent process
 //fork() returns -1 if something fails
-//int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
-int parent(struct s_pipe_data *data)//new
+int parent(struct s_pipe_data *data)
 {
     pid_t   pid1;
     pid_t   pid2;
@@ -638,30 +660,26 @@ int parent(struct s_pipe_data *data)//new
     if (pid1 == - 1)
     {
         perror ("Fork failed for child1");
-        //return (fork_error(fd_in, pipefd));
-        return (fork_error(data->fd_in, data->pipefd));//new
+        return (fork_error(data->fd_in, data->pipefd));
     }
     else if (pid1 == 0)
-        //child1(argc, argv, envp, pipefd, fd_in);
-        child1(data);//new
+        child1(data);
     pid2 = fork();
     if (pid2 == -1)
     {
         perror ("Fork failed for child2");
-        if (wait_child(pid1, &status1) == -1)//new
-            perror("Error waiting child1");//new
-        //return (fork_error(fd_in, pipefd));
+        if (wait_child(pid1, &status1) == -1)
+            perror("Error waiting child1");
         return (fork_error(data->fd_in, data->pipefd));
     }
     else if (pid2 == 0)
-        //child2(argc, argv, envp, pipefd, fd_in);
-        child2(data);//new
+        child2(data);
     fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
-    close_fd(fd_in);
+    close_fd(data -> fd_in);
     fprintf(stderr, "Closed correctly fd_in which is file1\n");//testing
-    close_fd(pipefd[0]);
+    close_fd(data -> pipefd[0]);
     fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
-    close_fd(pipefd[1]);
+    close_fd(data -> pipefd[1]);
     fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
     if (wait_child(pid1, &status1) == - 1)
     {
@@ -713,7 +731,6 @@ int	main(int argc, char **argv, char **envp)
     data.pipefd = pipefd;
     data.fd_in = fd_in;
     parent(&data);
-    //parent(argc, pipefd, argv, envp, fd_in);
     fprintf(stderr, "\n\n\nPROGRAM FINISHED\n\n\n");//testing
     return (0);
 }

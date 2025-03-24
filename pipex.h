@@ -27,7 +27,7 @@ typedef struct s_pipe_data
     char **envp;
     int *pipefd;
     int fd_in;
-}t_pipe_data
+}t_pipe_data;
 
 //function ptototype
 
