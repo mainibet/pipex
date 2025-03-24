@@ -9,7 +9,7 @@ char	*get_path_env(char **envp)
 {
 	int	i;
 
-    if (!envp || !envp[0])
+    if (!envp)
     {
         fprintf(stderr, "Error: no environment variables available.\n");//testing
         return (NULL);
@@ -64,12 +64,18 @@ char *get_only_cmd(char *argv)
             return (NULL);
         }
         ft_strlcpy (cmd, argv, len + 1);
-        return (cmd);
     }
     else
+    {
         cmd = ft_strdup(argv);
+        if (!cmd)
+        {
+            perror ("Malloc failed to get only cmd");
+            return (NULL);
+        }
+    }
     fprintf(stderr, "cmd_name in get_only_cmd is: %s\n", argv);//testing
-        return (cmd);
+    return (cmd);
 }
 
 //clean-up memory in strings inside an array 
@@ -103,12 +109,26 @@ char	*find_path(char *argv, char **envp)
 		return (NULL);
 	}
 	dir = ft_split(path, ':');
-	i = 0;
+    if (!dir)//new
+    {//tmp
+        return (NULL);//new
+    }//tmp
+        i = 0;
 	while (dir[i])
 	{
 		each_path = ft_strjoin(dir[i], "/");
+        if (!each_path)//new
+        {
+            free (dir[i]);//new
+            return (NULL);//new
+        }
 		file_path = ft_strjoin(each_path, argv);
-		free (each_path);
+        free (each_path);
+        if (!file_path)//new
+        {
+            free(dir[i]);//new
+            return (NULL);//new
+        }
 		if (access (file_path, F_OK) == 0)
 		{
 			fprintf(stderr, "Path found for cmd: %s\n", file_path);//TESTING
@@ -271,13 +291,21 @@ char **dup_new_cmd (char **cmd)
 //index i begins in 2 position of cmd1
 //loop until argc -1 to exclude file2
 //new_arg[j] doesn't occupy memory, so doesn't need to be included in malloc
+//cmd_arg is the argument that needs to be process for each child
 char    **exec_arg(int argc, char **argv, int child_num)
 {
     fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");//testing
     char    **cmd;
     char    **new_arg;
+    char    *cmd_arg;//NEW
     size_t  count;
 
+    if (child_num == 1)
+        cmd_arg == argv[2];
+    else if (child_num == 2)
+        cmd_arg = argv[argc - 2];
+    else
+        return (NULL);    
     if (ft_strchr(argv[2], ' ') && child_num == 1)
     {
         cmd = new_arr_cmd(argv[2]);
