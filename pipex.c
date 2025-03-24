@@ -446,12 +446,13 @@ int	ini_check(int argc, char **argv, char **envp)
         return (0);
 }
 //will be used for child1 and child2
-int setup_redir(t_pipe_data *data, int input_fd, int output_fd)//new
+//to call redirections and handle errors in it if needed
+int setup_redir(int input_fd, int output_fd, t_fd_dup *dup)//new
 {
     int fd_in_dup;
     int fd_out_dup;
 
-    if ((fd_dup_in = redir_input(input_fd)) < 0)
+    if ((fd_in_dup = redir_input(input_fd)) < 0)
     {
         perror("Failed redir_input");
         return (-1);
@@ -464,7 +465,49 @@ int setup_redir(t_pipe_data *data, int input_fd, int output_fd)//new
         return (-1);
     }
     fprintf(stderr, "Redirection output good\n");
+    dup -> input_dup = fd_in_dup;
+    dup -> output_dup = fd_out_dup;
     return 0;
+}
+
+//execution process for child1 and child2
+void    child_process(t_pipe_data *data, t_initial_fd *fd, int child_num)
+{
+    char **nargv;
+    t_fd_dup    dup;
+
+    if (setup_redir(fd -> input_fd, fd -> output_fd, &dup) != 0)
+    exit(1);
+    nargv = exec_arg(data -> argc, data -> argv, child_num);
+    if (!nargv)
+    {
+        perror ("nargv before execution");
+        close_fd(dup.input_dup);//new
+        close_fd(dup.output_dup);//new
+        exit(1);
+    }
+    fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
+    fprintf(stderr, "We are in child1 about to call execution\n");//testing
+    execution(nargv, data -> envp);
+    perror ("Execution failed in child 1");
+    free(nargv);
+    close_fd(dup.input_dup);//new
+    close_fd(dup.output_dup);//new
+    exit(1);
+}
+
+void    child1(t_pipe_data *data)
+{
+    int child_num;
+    t_initial_fd    fd;
+
+    child_num = 1;
+    fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
+    close_fd(data -> pipefd[0]);
+    // if (setup_redir(data, data -> fd_in, data -> pipefd[1]) != 0)
+    //     exit(1);
+    fd = (t_initial_fd){data->fd_in, data->pipefd[1]};//check norm
+    child_process(data, &fd, child_num);
 }
 
 //process for cmd1 (FORK1)
@@ -485,47 +528,67 @@ int setup_redir(t_pipe_data *data, int input_fd, int output_fd)//new
 //if fails needs to exit(1) to stop the process and go back to the parent
 //void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
 //void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new without fd[2] CALL IT GOOD IN PARENT
-void    child1(t_pipe_data *data)//check norm
-{
-    fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
-    char **nargv;
-    int fd_dup;
-    int pipefd_dup;
-    int child_num;
+// void    child1(t_pipe_data *data)//check norm
+// {
+    // fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
+    // char **nargv;
+    // int fd_dup;
+    // int pipefd_dup;
+    // int child_num;
     
-    close_fd(data -> pipefd[0]);
-	if ((fd_dup = redir_input(data -> fd_in)) < 0)
-    {
-        perror("Failed redirection input in child1");
-        exit(1);
-    }
-    fprintf(stderr, "redirection INPUT child1  good\n");//testing
-    if ((pipefd_dup = redir_output(data -> pipefd[1])) < 0)
-    {
-        close_fd (fd_dup);
-        perror("Failed redirection OUTPUT in child1");
-        exit(1);
-    }
-    fprintf(stderr, "Redirection output child1  good\n");//testing
-    child_num = 1;
-    nargv = exec_arg(data -> argc, data -> argv, child_num);
-    if (!nargv)
-    {
-        perror ("Failed to create neww array with arg before execution");
-        close_fd(pipefd_dup);
-        close_fd(fd_dup);
-        exit(1);
-    }
-    fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
-    fprintf(stderr, "We are in child1 about to call execution\n");//testing
-    execution(nargv, data -> envp);
-    perror ("Execution failed in child 1");
-    free(nargv);
-    close_fd(fd_dup);
-    close_fd(pipefd_dup);
-    exit (1);
-}
+    // close_fd(data -> pipefd[0]);
+	// if ((fd_dup = redir_input(data -> fd_in)) < 0)
+    // {
+    //     perror("Failed redirection input in child1");
+    //     exit(1);
+    // }
+    // fprintf(stderr, "redirection INPUT child1  good\n");//testing
+    // if ((pipefd_dup = redir_output(data -> pipefd[1])) < 0)
+    // {
+    //     close_fd (fd_dup);
+    //     perror("Failed redirection OUTPUT in child1");
+    //     exit(1);
+    // }
+    // fprintf(stderr, "Redirection output child1  good\n");//testing
+    // child_num = 1;
+    // nargv = exec_arg(data -> argc, data -> argv, child_num);
+    // if (!nargv)
+    // {
+    //     perror ("Failed to create neww array with arg before execution");
+        // close_fd(pipefd_dup);
+        // close_fd(fd_dup);
+    //     exit(1);
+    // }
+    // fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
+    // fprintf(stderr, "We are in child1 about to call execution\n");//testing
+    // execution(nargv, data -> envp);
+    // perror ("Execution failed in child 1");
+    // free(nargv);
+    // close_fd(fd_dup);
+    // close_fd(pipefd_dup);
+    //exit (1);
+// }
+//struct fd initialized with arg important for child2
+//child process called with that struct
+void    child2(t_pipe_data *data)
+{
+    int child_num;
+    t_initial_fd    fd;
+    int fd_out;
 
+    child_num = 2;
+    fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
+    close(data -> pipefd[1]);
+    close(data -> fd_in);
+    fd_out = open(data -> argv[data -> argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd_out == - 1)
+	{
+	    perror ("open output file");
+		exit (- 1);
+	}
+    fd = (t_initial_fd){data -> pipefd[0], fd_out};
+    child_process(data, &fd, child_num);
+}
 //process for cmd2(FORK2)
 //pipefd[1] not needed in this process
 //If any reirection fails will be close the dup fd opened before
@@ -534,55 +597,55 @@ void    child1(t_pipe_data *data)//check norm
 //First redir input from pipe to cmd2
 //then redirection output from cmd2 to file2
 //void child2 (int argc, char **argv, char **envp, int  *pipefd, int fd_in)
-void    child2 (t_pipe_data *data)//new
-{
-    fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
-    char **nargv;
-    int fd_dup;
-    int pipefd_dup;
-    int child_num;
-	int fd_out;
+// void    child2 (t_pipe_data *data)//new
+// {
+    // fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
+    // char **nargv;
+    // int fd_dup;
+    // int pipefd_dup;
+    // int child_num;
+	// int fd_out;
 
-    close(data -> pipefd[1]);
-    close(data -> fd_in);
-	fd_out = open(data -> argv[data -> argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd_out == - 1)
-	{
-	    perror ("open output file");
-		exit (- 1);
-	}
-    if ((pipefd_dup = redir_input(data -> pipefd[0])) < 0)
-    {
-        perror("Failed redirection input in child2");
-        exit(1);
-    }
-    fprintf(stderr, "redirection INPUT child2  good\n");//testing
-    if ((fd_dup = redir_output(fd_out)) < 0)
-    {
-        close_fd(pipefd_dup);
-        perror ("Failed redirection OUTPUT in child2");
-        exit(1);
-    }
-    fprintf(stderr, "Redirection OUTPUT cmd2 file2 good\n");//testing
-    child_num = 2;
-    nargv = exec_arg(data -> argc, data -> argv, child_num);
-    if (!nargv)
-    {
-        perror ("Failed to remove first argv called from main");
-        close_fd(pipefd_dup);
-        close_fd(fd_dup);
-        exit (1);
-    }
-    fprintf(stderr, "This is the NEW ARRAY in child2 of arg: %s\n\n\n", *nargv);//testing
-    fprintf(stderr, "We are in child2 about to call execution\n");//testing
-    fprintf(stderr, "%s\n", *nargv);//test
-    execution(nargv, data -> envp);
-    perror ("Execution failed in child2");
-    free (nargv);
-    close_fd(pipefd_dup);
-    close_fd(fd_dup);
-    exit(1);
-}
+    // close(data -> pipefd[1]);
+    // close(data -> fd_in);
+	// fd_out = open(data -> argv[data -> argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	// if (fd_out == - 1)
+	// {
+	//     perror ("open output file");
+	// 	exit (- 1);
+	// }
+    // if ((pipefd_dup = redir_input(data -> pipefd[0])) < 0)
+    // {
+    //     perror("Failed redirection input in child2");
+    //     exit(1);
+    // }
+    // fprintf(stderr, "redirection INPUT child2  good\n");//testing
+    // if ((fd_dup = redir_output(fd_out)) < 0)
+    // {
+    //     close_fd(pipefd_dup);
+    //     perror ("Failed redirection OUTPUT in child2");
+    //     exit(1);
+    // }
+    // fprintf(stderr, "Redirection OUTPUT cmd2 file2 good\n");//testing
+    // child_num = 2;
+    // nargv = exec_arg(data -> argc, data -> argv, child_num);
+    // if (!nargv)
+    // {
+    //     perror ("Failed to remove first argv called from main");
+    //     close_fd(pipefd_dup);
+    //     close_fd(fd_dup);
+    //     exit (1);
+    // }
+    // fprintf(stderr, "This is the NEW ARRAY in child2 of arg: %s\n\n\n", *nargv);//testing
+    // fprintf(stderr, "We are in child2 about to call execution\n");//testing
+    // fprintf(stderr, "%s\n", *nargv);//test
+    // execution(nargv, data -> envp);
+    // perror ("Execution failed in child2");
+    // free (nargv);
+    // close_fd(pipefd_dup);
+    // close_fd(fd_dup);
+    // exit(1);
+// }
 
 //First initial check
 //file 1 is argv[1]

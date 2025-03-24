@@ -28,7 +28,18 @@ typedef struct s_pipe_data
     int *pipefd;
     int fd_in;
 }t_pipe_data;
-
+//struct for file1 and file2
+typedef struct s_initial_fd 
+{
+    int input_fd;
+    int output_fd;
+}t_initial_fd;
+//structu for fd duplicated
+typedef struct s_fd_dup
+{
+    int input_dup;
+    int output_dup;
+}t_fd_dup;
 //function ptototype
 
 #endif
