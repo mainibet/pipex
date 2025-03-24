@@ -19,6 +19,16 @@
 # include <stdio.h> //to perror (validar si esta o erno)
 # include <sys/wait.h>//to waitpid() and wait() fork() includes macros WIFEXITED and WEXITSTATUS
 
+//struct definition
+typedef struct
+{
+    int argc;
+    char **argv;
+    char **envp;
+    int *pipefd;
+    int fd_in;
+}pipe_data
+
 //function ptototype
 
 #endif
