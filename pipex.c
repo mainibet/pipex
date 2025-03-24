@@ -215,20 +215,6 @@ int redir_output(int fd)
     close_fd(fd);
     return (0);
 }
-// //find the arg with the cmd and duplicate it to include it later in the new array as argv[[0]]
-// char *get_narg(char *argv)
-// {
-//     char    *cmd_arg;
-
-//     cmd_arg = ft_strdup(argv);
-//     if (!cmd_arg)
-//     {
-//         perror ("strdup failed in get_arg");
-//         return (NULL);//because it failed
-//     }
-//     else
-//         return (cmd_arg);//check where to free after use
-// }
 //to create the new array for execution 
 //in case the cmd arg has multiple words
 //this means flags or parameteres
@@ -496,6 +482,10 @@ void    child_process(t_pipe_data *data, t_initial_fd *fd, int child_num)
     exit(1);
 }
 
+//process for cmd1 (FORK1)
+//Function void because it succees or 
+//exit to go back to the parent
+//pipe_data includes pipefd
 void    child1(t_pipe_data *data)
 {
     int child_num;
@@ -504,14 +494,11 @@ void    child1(t_pipe_data *data)
     child_num = 1;
     fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     close_fd(data -> pipefd[0]);
-    // if (setup_redir(data, data -> fd_in, data -> pipefd[1]) != 0)
-    //     exit(1);
     fd = (t_initial_fd){data->fd_in, data->pipefd[1]};//check norm
     child_process(data, &fd, child_num);
 }
 
-//process for cmd1 (FORK1)
-//Function void because it succees or exit to go back to the parent, doesn't return
+//COMMENTS OF THE PREVIOUS VERSION OF CHILD1
 //*nargv is the new array of arguments needed for execution
 //fd_dup is the dup of file1 after the redirection
 //pipefd_dup is the dup of pipefd after the redirection 
@@ -526,50 +513,11 @@ void    child1(t_pipe_data *data)
 //If the execution succees pipefd[1] can't manually be closed in the child1 and nargv 
 //can't be free, needs to be close in the parent and the child close it automatically
 //if fails needs to exit(1) to stop the process and go back to the parent
-//void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
-//void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new without fd[2] CALL IT GOOD IN PARENT
-// void    child1(t_pipe_data *data)//check norm
-// {
-    // fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
-    // char **nargv;
-    // int fd_dup;
-    // int pipefd_dup;
-    // int child_num;
-    
-    // close_fd(data -> pipefd[0]);
-	// if ((fd_dup = redir_input(data -> fd_in)) < 0)
-    // {
-    //     perror("Failed redirection input in child1");
-    //     exit(1);
-    // }
-    // fprintf(stderr, "redirection INPUT child1  good\n");//testing
-    // if ((pipefd_dup = redir_output(data -> pipefd[1])) < 0)
-    // {
-    //     close_fd (fd_dup);
-    //     perror("Failed redirection OUTPUT in child1");
-    //     exit(1);
-    // }
-    // fprintf(stderr, "Redirection output child1  good\n");//testing
-    // child_num = 1;
-    // nargv = exec_arg(data -> argc, data -> argv, child_num);
-    // if (!nargv)
-    // {
-    //     perror ("Failed to create neww array with arg before execution");
-        // close_fd(pipefd_dup);
-        // close_fd(fd_dup);
-    //     exit(1);
-    // }
-    // fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
-    // fprintf(stderr, "We are in child1 about to call execution\n");//testing
-    // execution(nargv, data -> envp);
-    // perror ("Execution failed in child 1");
-    // free(nargv);
-    // close_fd(fd_dup);
-    // close_fd(pipefd_dup);
-    //exit (1);
-// }
+
 //struct fd initialized with arg important for child2
 //child process called with that struct
+//process for cmd2(FORK2)
+//pipefd[1] not needed in this process
 void    child2(t_pipe_data *data)
 {
     int child_num;
@@ -589,94 +537,15 @@ void    child2(t_pipe_data *data)
     fd = (t_initial_fd){data -> pipefd[0], fd_out};
     child_process(data, &fd, child_num);
 }
-//process for cmd2(FORK2)
-//pipefd[1] not needed in this process
+//COMMENTS OF THE PREVIOUS VERSION OF CHILD2
+
 //If any reirection fails will be close the dup fd opened before
 //File2 and pipfd are close in redir functions if that fails
 //After all the reirection will be done the execution
 //First redir input from pipe to cmd2
 //then redirection output from cmd2 to file2
 //void child2 (int argc, char **argv, char **envp, int  *pipefd, int fd_in)
-// void    child2 (t_pipe_data *data)//new
-// {
-    // fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
-    // char **nargv;
-    // int fd_dup;
-    // int pipefd_dup;
-    // int child_num;
-	// int fd_out;
 
-    // close(data -> pipefd[1]);
-    // close(data -> fd_in);
-	// fd_out = open(data -> argv[data -> argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	// if (fd_out == - 1)
-	// {
-	//     perror ("open output file");
-	// 	exit (- 1);
-	// }
-    // if ((pipefd_dup = redir_input(data -> pipefd[0])) < 0)
-    // {
-    //     perror("Failed redirection input in child2");
-    //     exit(1);
-    // }
-    // fprintf(stderr, "redirection INPUT child2  good\n");//testing
-    // if ((fd_dup = redir_output(fd_out)) < 0)
-    // {
-    //     close_fd(pipefd_dup);
-    //     perror ("Failed redirection OUTPUT in child2");
-    //     exit(1);
-    // }
-    // fprintf(stderr, "Redirection OUTPUT cmd2 file2 good\n");//testing
-    // child_num = 2;
-    // nargv = exec_arg(data -> argc, data -> argv, child_num);
-    // if (!nargv)
-    // {
-    //     perror ("Failed to remove first argv called from main");
-    //     close_fd(pipefd_dup);
-    //     close_fd(fd_dup);
-    //     exit (1);
-    // }
-    // fprintf(stderr, "This is the NEW ARRAY in child2 of arg: %s\n\n\n", *nargv);//testing
-    // fprintf(stderr, "We are in child2 about to call execution\n");//testing
-    // fprintf(stderr, "%s\n", *nargv);//test
-    // execution(nargv, data -> envp);
-    // perror ("Execution failed in child2");
-    // free (nargv);
-    // close_fd(pipefd_dup);
-    // close_fd(fd_dup);
-    // exit(1);
-// }
-
-//First initial check
-//file 1 is argv[1]
-//file2 is argv[argc - 1]
-//Then open file1 to be used in child1 when redirection input of cmd1
-//Then open file2 to be use in child2 in redir cmd2 output
-//fd[0] is file1
-//fd[1] is file2
-/*
-int open_fd(int argc, char **argv, char **envp, int fd[2])//check if norminette is happy with this
-{
-    if (ini_check(argc, argv, envp) < 0)
-        return (-1);
-    fd[0] = open(argv[1], O_RDONLY);
-    if (fd[0] == - 1)
-	{
-	    perror ("Error opening file1");
-		return (-1);
-	}
-    fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd[1] == -1)//now this is made in child2 and tge open 
-    {
-        perror ("Error opening file2");
-        close_fd(fd[0]);
-        return (-1);//check if this is valid
-    }
-    fprintf(stderr, "Successfully opened\n");//testing
-    close_fd(fd[1]);
-				return (0);
-}
-*/
 //parent function to do the fork() for the child processess
 int wait_child(pid_t  pid, int *status)
 {
