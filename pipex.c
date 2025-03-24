@@ -60,7 +60,7 @@ char *get_only_cmd(char *argv)
         cmd = malloc (sizeof (char) * len + 1);
         if (!cmd)
         {
-            perror ("Malloc failed to get only cmd");
+            perror ("Malloc in get only cmd");
             return (NULL);
         }
         ft_strlcpy (cmd, argv, len + 1);
@@ -70,7 +70,7 @@ char *get_only_cmd(char *argv)
         cmd = ft_strdup(argv);
         if (!cmd)
         {
-            perror ("Malloc failed to get only cmd");
+            perror ("Malloc in get only cmd");
             return (NULL);
         }
     }
@@ -109,25 +109,25 @@ char	*find_path(char *argv, char **envp)
 		return (NULL);
 	}
 	dir = ft_split(path, ':');
-    if (!dir)//new
+    if (!dir)
     {//tmp
-        return (NULL);//new
+        return (NULL);
     }//tmp
         i = 0;
 	while (dir[i])
 	{
 		each_path = ft_strjoin(dir[i], "/");
-        if (!each_path)//new
+        if (!each_path)
         {
-            free (dir[i]);//new
-            return (NULL);//new
+            free (dir[i]);
+            return (NULL);
         }
 		file_path = ft_strjoin(each_path, argv);
         free (each_path);
-        if (!file_path)//new
+        if (!file_path)
         {
-            free(dir[i]);//new
-            return (NULL);//new
+            free(dir[i]);
+            return (NULL);
         }
 		if (access (file_path, F_OK) == 0)
 		{
@@ -185,7 +185,7 @@ int	redir_input(int fd)
 	fd_dup = dup2(fd, STDIN_FILENO);
 	if (fd_dup == - 1)
 	{
-		perror ("Dup2 failed stdin in redir_input");
+		perror ("Dup2 in redir_input");
         close_fd (fd);//NEW
 		return (1);
 	}
@@ -207,7 +207,7 @@ int redir_output(int fd)
     fd_dup = dup2(fd, STDOUT_FILENO);
     if (fd_dup == -1)
     {
-        perror ("Dup2 failed with cmd2 to file2 in redir_output");
+        perror ("Dup2 in redir_output");
         close_fd(fd);
         return (1);
     }
@@ -241,7 +241,7 @@ char **new_arr_cmd(char *argv)
     cmd = ft_split(argv, ' ');
     if (!cmd)
     {
-        perror("malloc failed in ft_split");
+        perror("malloc in ft_split");
         return (NULL);
     }
     return (cmd);
@@ -262,7 +262,7 @@ char **dup_new_cmd (char **cmd)
     new_arg = malloc(sizeof(char *) * (len + 1));
     if (!new_arg)
     {
-        perror ("malloc failed in exec_arg");
+        perror ("malloc in exec_arg");
         return (NULL);
     }
     while ( i < len)
@@ -297,8 +297,7 @@ char    **exec_arg(int argc, char **argv, int child_num)
     fprintf(stderr, "\n\n\nWe are going to find the correct args befor execution\n\n\n");//testing
     char    **cmd;
     char    **new_arg;
-    char    *cmd_arg;//NEW
- //   size_t  count;
+    char    *cmd_arg;
 
     if (child_num == 1)
         cmd_arg = argv[2];
@@ -314,39 +313,15 @@ char    **exec_arg(int argc, char **argv, int child_num)
             perror("new_arr_cmd in exec_arg");
             return (NULL);
         }
-        // count = 0;
-        // while (cmd[count])
-        //     count++;
         new_arg = dup_new_cmd(cmd);
         if (!new_arg)
         {
-            perror ("malloc failed in exec_arg");
-       //     free_memory(cmd, count);
+            perror ("malloc in exec_arg");
             free_memory(cmd, 0);
             free (cmd);
             return (NULL);
         }
     }
-    // else if (ft_strchr(argv[argc - 2], ' ') && child_num == 2)
-    // {
-    //     cmd = new_arr_cmd(argv[argc - 2]);
-    //     if (!cmd)
-    //     {
-    //         perror("error getting new_arr_cmd in exec_arg");
-    //         return (NULL);
-    //     }
-    //     count = 0;
-    //     while (cmd[count])
-    //         count++;
-    //     new_arg = dup_new_cmd(cmd);
-    //     if (!new_arg)
-    //     {
-    //         perror ("malloc failed in exec_arg");
-    //         free_memory(cmd, count);
-    //         free (cmd);
-    //         return (NULL);
-    //     }
-    // }
     else
     {
         new_arg = malloc (sizeof(char *) * (2));
@@ -356,11 +331,6 @@ char    **exec_arg(int argc, char **argv, int child_num)
             return (NULL);
         }
         new_arg[0] = cmd_arg;
-        // new_arg[1] = NULL;
-        // if (child_num == 1)
-        //    new_arg[0] = argv[2];
-        // else if (child_num == 2)
-        //   new_arg[0] = argv[argc - 2];
         new_arg[1] = NULL;
     }
     return (new_arg);
@@ -501,7 +471,6 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new wit
     int child_num;
     
     close_fd(pipefd[0]);
-    //close_fd(fd[1]);//NEW
 	if ((fd_dup = redir_input(fd_in)) < 0)
     {
         perror("Failed redirection input in child1");
@@ -531,10 +500,6 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new wit
     free(nargv);
     close_fd(fd_dup);
     close_fd(pipefd_dup);
-    //close_fd(fd[1]);//NEW
-    //close(STDIN_FILENO);
-    //close(STDOUT_FILENO);
-    //close(STDERR_FILENO);
     exit (1);
 }
 
@@ -642,6 +607,18 @@ int wait_child(pid_t  pid, int *status)
     return (0);
 }
 
+//function to close fd when a fork fails
+int fork_error(int fd_in, int *pipefd)
+{
+    close_fd(fd_in);
+    fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
+    close_fd(pipefd[0]);
+    fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
+    close_fd(pipefd[1]);
+    fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
+    return (-1);
+}
+
 //pid1 is child1 (cmd1)
 //pid2 is child2 (cmd2)
 //pid == 0 means we are in child process
@@ -659,13 +636,14 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
     if (pid1 == - 1)
     {
         perror ("Fork failed for child1");
-        close_fd(fd_in);
-        fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-        close_fd(pipefd[0]);
-        fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
-        close_fd(pipefd[1]);
-        fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
-        return (-1);
+        return (fork_error(fd_in, pipefd));
+        // close_fd(fd_in);
+        // fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
+        // close_fd(pipefd[0]);
+        // fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
+        // close_fd(pipefd[1]);
+        // fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
+        // return (-1);
     }
     else if (pid1 == 0)
         child1(argc, argv, envp, pipefd, fd_in);
@@ -673,20 +651,21 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
     if (pid2 == -1)
     {
         perror ("Fork failed for child2");
-        close_fd(fd_in);
-        fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-        close_fd(pipefd[0]);
-        fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
-        close_fd(pipefd[1]);
-        fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
-        wait_child(pid1, &status1);
-        return (-1);
+        // close_fd(fd_in);
+        // fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
+        // close_fd(pipefd[0]);
+        // fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
+        // close_fd(pipefd[1]);
+        // fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
+        if (wait_child(pid1, &status1) == -1)//new
+            perror("Error waiting child1");//new
+        return (fork_error(fd_in, pipefd));
     }
     else if (pid2 == 0)
         child2(argc, argv, envp, pipefd, fd_in);
     fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
     close_fd(fd_in);
-    fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
+    fprintf(stderr, "Closed correctly fd_in which is file1\n");//testing
     close_fd(pipefd[0]);
     fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
     close_fd(pipefd[1]);

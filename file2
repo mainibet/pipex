@@ -6,7 +6,7 @@
      6	-rw-r--r-- 1 albetanc 2024_berlin      12 Mar 12 11:45 expected_output.txt
      7	-rw-r--r-- 1 albetanc 2024_berlin      11 Mar 20 16:05 file0.txt
      8	-rw-r--r-- 1 albetanc 2024_berlin    1524 Mar 19 13:25 file1.txt
-     9	-rw-r--r-- 1 albetanc 2024_berlin       0 Mar 24 12:11 file2
+     9	-rw-r--r-- 1 albetanc 2024_berlin       0 Mar 24 12:34 file2
     10	-rw-r--r-- 1 albetanc 2024_berlin     304 Mar 24 12:08 file2.txtc
     11	-rw-r--r-- 1 albetanc 2024_berlin       1 Mar 21 16:59 file3.txt
     12	-rwxr-xr-x 1 albetanc 2024_berlin    4004 Mar 11 12:15 fulltest_pipex.sh
@@ -19,10 +19,10 @@
     19	--w------- 1 albetanc 2024_berlin       3 Mar  5 13:10 no_readable.txt
     20	-rw-r--r-- 1 albetanc 2024_berlin      47 Mar  4 11:14 outfile.txt
     21	-rw-r--r-- 1 albetanc 2024_berlin     180 Mar 12 11:45 output.txt
-    22	-rwxr-xr-x 1 albetanc 2024_berlin   37120 Mar 24 12:11 pipex
-    23	-rw-r--r-- 1 albetanc 2024_berlin   21174 Mar 24 12:11 pipex.c
+    22	-rwxr-xr-x 1 albetanc 2024_berlin   37216 Mar 24 12:34 pipex
+    23	-rw-r--r-- 1 albetanc 2024_berlin   20558 Mar 24 12:34 pipex.c
     24	-rw-r--r-- 1 albetanc 2024_berlin    1270 Mar 18 12:37 pipex.h
-    25	-rw-r--r-- 1 albetanc 2024_berlin   27008 Mar 24 12:11 pipex.o
+    25	-rw-r--r-- 1 albetanc 2024_berlin   27056 Mar 24 12:34 pipex.o
     26	-rw-r--r-- 1 albetanc 2024_berlin 1587014 Mar  3 12:50 pipex.pdf
     27	-rw-r--r-- 1 albetanc 2024_berlin       0 Mar 24 10:18 testf.txt
     28	drwxr-xr-x 2 albetanc 2024_berlin      47 Mar  4 11:14 testing
