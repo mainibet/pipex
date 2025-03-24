@@ -624,7 +624,6 @@ int fork_error(int fd_in, int *pipefd)
 //pid == 0 means we are in child process
 //pid > 0 means we are in the parent process
 //fork() returns -1 if something fails
-//int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
 int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
 {
     pid_t   pid1;
@@ -637,13 +636,6 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
     {
         perror ("Fork failed for child1");
         return (fork_error(fd_in, pipefd));
-        // close_fd(fd_in);
-        // fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-        // close_fd(pipefd[0]);
-        // fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
-        // close_fd(pipefd[1]);
-        // fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
-        // return (-1);
     }
     else if (pid1 == 0)
         child1(argc, argv, envp, pipefd, fd_in);
@@ -651,12 +643,6 @@ int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
     if (pid2 == -1)
     {
         perror ("Fork failed for child2");
-        // close_fd(fd_in);
-        // fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
-        // close_fd(pipefd[0]);
-        // fprintf(stderr, "Closed correctly pipefd[0]\n");//testing
-        // close_fd(pipefd[1]);
-        // fprintf(stderr, "Closed correctly pipefd[1]\n");//testing
         if (wait_child(pid1, &status1) == -1)//new
             perror("Error waiting child1");//new
         return (fork_error(fd_in, pipefd));
@@ -699,21 +685,21 @@ int	main(int argc, char **argv, char **envp)
     ft_printf("argc including the program: %d\n", argc);//testing
     if (argc != 5)
         return (ft_printf("include 4 args\n"), 1);
-				if (ini_check(argc, argv, envp) < 0)
+    if (ini_check(argc, argv, envp) < 0)
         return (-1);
     fd_in = open(argv[1], O_RDONLY);
     if (fd_in == - 1)
-	{
-	    perror ("Error opening file1");
-		return (-1);
-	}
+    {
+        perror ("Error opening file1");
+        return (-1);
+    }
     if (pipe(pipefd) == - 1)
     {
         perror("pipe failed");
         close_fd(fd_in);
-        exit (EXIT_FAILURE);
+        return (-1);
     }
-	parent(argc, pipefd, argv, envp, fd_in);
+    parent(argc, pipefd, argv, envp, fd_in);
     fprintf(stderr, "\n\n\nPROGRAM FINISHED\n\n\n");//testing
     return (0);
 }
