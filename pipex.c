@@ -688,6 +688,7 @@ int	main(int argc, char **argv, char **envp)
 {
     int pipefd[2];
     int fd_in;
+    struct s_pipe_data data;//check norm
 				
     ft_printf("argc including the program: %d\n", argc);//testing
     if (argc != 5)
@@ -706,7 +707,13 @@ int	main(int argc, char **argv, char **envp)
         close_fd(fd_in);
         return (-1);
     }
-    parent(argc, pipefd, argv, envp, fd_in);
+    data.argc = argc;
+    data.argv = argv;
+    data.envp = envp;
+    data.pipefd = pipefd;
+    data.fd_in = fd_in;
+    parent(&data);
+    //parent(argc, pipefd, argv, envp, fd_in);
     fprintf(stderr, "\n\n\nPROGRAM FINISHED\n\n\n");//testing
     return (0);
 }
