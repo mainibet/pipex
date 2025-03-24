@@ -462,7 +462,8 @@ int	ini_check(int argc, char **argv, char **envp)
 //can't be free, needs to be close in the parent and the child close it automatically
 //if fails needs to exit(1) to stop the process and go back to the parent
 //void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
-void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new without fd[2] CALL IT GOOD IN PARENT
+//void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new without fd[2] CALL IT GOOD IN PARENT
+void    child1(struct s_pipe_data *data)//check norm
 {
     fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     char **nargv;
@@ -470,14 +471,14 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new wit
     int pipefd_dup;
     int child_num;
     
-    close_fd(pipefd[0]);
-	if ((fd_dup = redir_input(fd_in)) < 0)
+    close_fd(data -> pipefd[0]);
+	if ((fd_dup = redir_input(data -> fd_in)) < 0)
     {
         perror("Failed redirection input in child1");
         exit(1);
     }
     fprintf(stderr, "redirection INPUT child1  good\n");//testing
-    if ((pipefd_dup = redir_output(pipefd[1])) < 0)
+    if ((pipefd_dup = redir_output(data -> pipefd[1])) < 0)
     {
         close_fd (fd_dup);
         perror("Failed redirection OUTPUT in child1");
@@ -485,7 +486,7 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new wit
     }
     fprintf(stderr, "Redirection output child1  good\n");//testing
     child_num = 1;
-    nargv = exec_arg(argc,argv, child_num);
+    nargv = exec_arg(data -> argc, data -> argv, child_num);
     if (!nargv)
     {
         perror ("Failed to create neww array with arg before execution");
@@ -495,7 +496,7 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new wit
     }
     fprintf(stderr, "This is the NEW ARRAY in child1 of arg: %s\n\n\n", *nargv);//testing
     fprintf(stderr, "We are in child1 about to call execution\n");//testing
-    execution(nargv, envp);
+    execution(nargv, data -> envp);
     perror ("Execution failed in child 1");
     free(nargv);
     close_fd(fd_dup);
@@ -625,7 +626,7 @@ int fork_error(int fd_in, int *pipefd)
 //pid > 0 means we are in the parent process
 //fork() returns -1 if something fails
 //int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
-int parent(s_pipe_data *data)//new
+int parent(struct s_pipe_data *data)//new
 {
     pid_t   pid1;
     pid_t   pid2;
