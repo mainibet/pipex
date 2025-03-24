@@ -462,7 +462,7 @@ int	ini_check(int argc, char **argv, char **envp)
 //can't be free, needs to be close in the parent and the child close it automatically
 //if fails needs to exit(1) to stop the process and go back to the parent
 //void child1(int argc, int  *pipefd, char **argv, char **envp, int fd[2])
-void child1(int argc, char **argv, char **envp, int *pipefd, int fd_int)//new without fd[2] CALL IT GOOD IN PARENT
+void child1(int argc, char **argv, char **envp, int *pipefd, int fd_in)//new without fd[2] CALL IT GOOD IN PARENT
 {
     fprintf(stderr, "\nCHILD1 WILL BEGIN\n\n\n");//testing
     char **nargv;
@@ -516,7 +516,7 @@ void child1(int argc, char **argv, char **envp, int *pipefd, int fd_int)//new wi
 //First redir input from pipe to cmd2
 //then redirection output from cmd2 to file2
 //void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd[2])
-void child2 (int argc, int  *pipefd, char **argv, char **envp, int fd_in)//new
+void child2 (int argc, char **argv, char **envp, int  *pipefd, int fd_in)//new
 {
     fprintf(stderr, "\nCHILD2 WILL BEGIN\n\n\n");//testing
     char **nargv;
@@ -622,7 +622,7 @@ int wait_child(pid_t  pid, int *status)
 //pid > 0 means we are in the parent process
 //fork() returns -1 if something fails
 //int parent(int argc, int *pipefd, char **argv, char **envp, int fd[2])
-int parent(int argc, int *pipefd, char **argv, char **envp, int fd)
+int parent(int argc, int *pipefd, char **argv, char **envp, int fd_in)
 {
     pid_t   pid1;
     pid_t   pid2;
@@ -654,7 +654,7 @@ if (ini_check(argc, argv, envp) < 0)
         return (-1);
     }
     else if (pid1 == 0)
-        child1(argc, pipefd, argv, envp, fd_in);
+        child1(argc, argv, envp, pipefd, fd_in);
     pid2 = fork();
     if (pid2 == -1)
     {
@@ -671,7 +671,7 @@ if (ini_check(argc, argv, envp) < 0)
         return (-1);
     }
     else if (pid2 == 0)
-        child2(argc, pipefd, argv, envp, fd_in);
+        child2(argc, argv, envp, pipefd, fd_in);
     fprintf(stderr, "We will close in the parent all the fd opened and after forks\n");//testing
     close_fd(fd_in);
     fprintf(stderr, "Closed correctly fd[0] which is file1\n");//testing
