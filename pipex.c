@@ -298,54 +298,55 @@ char    **exec_arg(int argc, char **argv, int child_num)
     char    **cmd;
     char    **new_arg;
     char    *cmd_arg;//NEW
-    size_t  count;
+ //   size_t  count;
 
     if (child_num == 1)
-        cmd_arg == argv[2];
+        cmd_arg = argv[2];
     else if (child_num == 2)
         cmd_arg = argv[argc - 2];
     else
         return (NULL);    
-    if (ft_strchr(argv[2], ' ') && child_num == 1)
+    if (ft_strchr(cmd_arg, ' '))
     {
-        cmd = new_arr_cmd(argv[2]);
+        cmd = new_arr_cmd(cmd_arg);
         if (!cmd)
         {
-            perror("error getting new_arr_cmd in exec_arg");
+            perror("new_arr_cmd in exec_arg");
             return (NULL);
         }
-        count = 0;
-        while (cmd[count])
-            count++;
+        // count = 0;
+        // while (cmd[count])
+        //     count++;
         new_arg = dup_new_cmd(cmd);
         if (!new_arg)
         {
             perror ("malloc failed in exec_arg");
-            free_memory(cmd, count);
+       //     free_memory(cmd, count);
+            free_memory(cmd, 0);
             free (cmd);
             return (NULL);
         }
     }
-    else if (ft_strchr(argv[argc - 2], ' ') && child_num == 2)
-    {
-        cmd = new_arr_cmd(argv[argc - 2]);
-        if (!cmd)
-        {
-            perror("error getting new_arr_cmd in exec_arg");
-            return (NULL);
-        }
-        count = 0;
-        while (cmd[count])
-            count++;
-        new_arg = dup_new_cmd(cmd);
-        if (!new_arg)
-        {
-            perror ("malloc failed in exec_arg");
-            free_memory(cmd, count);
-            free (cmd);
-            return (NULL);
-        }
-    }
+    // else if (ft_strchr(argv[argc - 2], ' ') && child_num == 2)
+    // {
+    //     cmd = new_arr_cmd(argv[argc - 2]);
+    //     if (!cmd)
+    //     {
+    //         perror("error getting new_arr_cmd in exec_arg");
+    //         return (NULL);
+    //     }
+    //     count = 0;
+    //     while (cmd[count])
+    //         count++;
+    //     new_arg = dup_new_cmd(cmd);
+    //     if (!new_arg)
+    //     {
+    //         perror ("malloc failed in exec_arg");
+    //         free_memory(cmd, count);
+    //         free (cmd);
+    //         return (NULL);
+    //     }
+    // }
     else
     {
         new_arg = malloc (sizeof(char *) * (2));
@@ -354,11 +355,12 @@ char    **exec_arg(int argc, char **argv, int child_num)
             perror ("malloc failed in exec_arg");
             return (NULL);
         }
-        new_arg[1] = NULL;
-        if (child_num == 1)
-           new_arg[0] = argv[2];
-        else if (child_num == 2)
-          new_arg[0] = argv[argc - 2];
+        new_arg[0] = cmd_arg;
+        // new_arg[1] = NULL;
+        // if (child_num == 1)
+        //    new_arg[0] = argv[2];
+        // else if (child_num == 2)
+        //   new_arg[0] = argv[argc - 2];
         new_arg[1] = NULL;
     }
     return (new_arg);
