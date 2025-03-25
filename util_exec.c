@@ -99,11 +99,21 @@ char	**exec_arg(int argc, char **argv, int child_num)
 	return (new_arg);
 }
 
+void	free_nargv(char **nargv)
+{
+	size_t	count;
+
+	count = 0;
+	while (nargv[count])
+		count++;
+	free_memory(nargv, count);
+	free(nargv);
+}
+
 void	execution(char	**nargv, char **const envp)
 {
 	char	*cmd_name;
 	char	*cmd_path;
-	size_t	count;
 
 	cmd_name = get_only_cmd(nargv[0]);
 	cmd_path = find_path (cmd_name, envp);
@@ -111,22 +121,14 @@ void	execution(char	**nargv, char **const envp)
 	{
 		perror ("command_path not found");
 		free(cmd_name);
-		count = 0;
-		while (nargv[count])
-			count++;
-		free_memory(nargv, count);
-		free (nargv);
+		free_nargv(nargv);
 		exit(EXIT_FAILURE);
 	}
 	execve(cmd_path, nargv, envp);
 	perror ("execve failed");
 	free (cmd_name);
 	free (cmd_path);
-	count = 0;
-	while (nargv[count])
-		count++;
-	free_memory(nargv, count);
-	free (nargv);
+	free_nargv(nargv);
 	exit (EXIT_FAILURE);
 }
 
