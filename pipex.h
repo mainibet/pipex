@@ -42,26 +42,25 @@ typedef struct s_fd_dup
 }t_fd_dup;
 
 
-char	*get_path_env(char **envp);
-char	*get_only_cmd(char *argv);
-char	*find_path(char *argv, char **envp);
-int		check_cmd(int argc, char **argv, char **envp);
-int		ini_check(int argc, char **argv, char **envp);
-int		redir_input(int fd);
-int		redir_output(int fd);
-int		setup_redir(int input_fd, int output_fd, t_fd_dup *dup);
-void	child_process(t_pipe_data *data, t_initial_fd *fd, int child_num);
-char	**new_arr_cmd(char *argv);
-char	**dup_new_cmd(char **cmd);
-char	**exec_arg(int argc, char **argv, int child_num);
-void	execution(char	**nargv, char **const envp);
-int		close_fd(int fd);
-void	free_memory(char **narg, int j);
-int		wait_child(pid_t pid, int *status);
-int		fork_error(int fd_in, int *pipefd);
-void	free_nargv(char **nargv);
-char	*malloc_error(void);
-void	free_name_path(char *cmd_name, char *cmd_path);
+char		*get_path_env(char **envp);
+char		*get_only_cmd(char *argv);
+char		*find_path(char *argv, char **envp);
+int			check_cmd(int argc, char **argv, char **envp);
+int			ini_check(int argc, char **argv, char **envp);
+int			redir_input(int fd);
+int			redir_output(int fd);
+int			setup_redir(int input_fd, int output_fd, t_fd_dup *dup);
+void		child_process(t_pipe_data *data, t_initial_fd *fd, int child_num);
+char		**new_arr_cmd(char *argv);
+char		**dup_new_cmd(char **cmd);
+char		**exec_arg(int argc, char **argv, int child_num);
+void		execution(char	**nargv, char **const envp);
+int			close_fd(int fd);
+void		free_memory(char **narg, int j);
+int			wait_child(pid_t pid, int *status);
+int			fork_error(int fd_in, int *pipefd);
+char		*malloc_error(void);
+void		free_name_path(char *cmd_name, char *cmd_path);
 
 #endif
 

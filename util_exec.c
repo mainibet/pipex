@@ -99,7 +99,7 @@ char	**exec_arg(int argc, char **argv, int child_num)
 	return (new_arg);
 }
 
-void	free_nargv(char **nargv)
+static void	free_nargv(char **nargv)
 {
 	size_t	count;
 
