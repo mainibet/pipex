@@ -59,6 +59,7 @@ int		close_fd(int fd);
 void	free_memory(char **narg, int j);
 int		wait_child(pid_t pid, int *status);
 int		fork_error(int fd_in, int *pipefd);
+void	free_nargv(char **nargv);
 
 #endif
 
