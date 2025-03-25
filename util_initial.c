@@ -103,6 +103,12 @@ char	*find_path(char *argv, char **envp)
 	free (dir);
 	return (NULL);
 }
+//test
+void	free_name_path(char *cmd_name, char *cmd_path)
+{
+	free (cmd_path);
+	free (cmd_name);
+}
 
 int check_cmd(int argc, char **argv, char **envp)
 {
@@ -124,12 +130,10 @@ int check_cmd(int argc, char **argv, char **envp)
 		if ((access(cmd_path, X_OK) == -1))
 		{
 			perror("cmd2 is not executable");
-			free(cmd_name);
-			free(cmd_path);
+			free_name_path(cmd_name, cmd_path);
 			return (-1);
 		}
-		free (cmd_path);
-		free (cmd_name);
+		free_name_path(cmd_name, cmd_path);
 		i++;
 	}
 	return (0);
