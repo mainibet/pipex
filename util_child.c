@@ -47,12 +47,14 @@ int	setup_redir(int input_fd, int output_fd, t_fd_dup *dup)
 	int	fd_in_dup;
 	int	fd_out_dup;
 
-	if ((fd_in_dup = redir_input(input_fd)) < 0)
+	fd_in_dup = redir_input(input_fd);
+	if (fd_in_dup < 0)
 	{
 		perror("Failed redir_input");
 		return (-1);
 	}
-	if ((fd_out_dup = redir_output(output_fd)) < 0)
+	fd_out_dup = redir_output(output_fd);
+	if (fd_out_dup < 0)
 	{
 		close_fd(fd_in_dup);
 		perror("Failed redirection OUTPUT");

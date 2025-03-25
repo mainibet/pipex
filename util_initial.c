@@ -103,14 +103,14 @@ char	*find_path(char *argv, char **envp)
 	free (dir);
 	return (NULL);
 }
-//test
+
 void	free_name_path(char *cmd_name, char *cmd_path)
 {
 	free (cmd_path);
 	free (cmd_name);
 }
 
-int check_cmd(int argc, char **argv, char **envp)
+int	check_cmd(int argc, char **argv, char **envp)
 {
 	int		i;
 	char	*cmd_name;
