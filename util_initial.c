@@ -40,20 +40,14 @@ char	*get_only_cmd(char *argv)
 		len = space - argv;
 		cmd = malloc (sizeof (char) * len + 1);
 		if (!cmd)
-		{
-			perror ("Malloc in get only cmd");
-			return (NULL);
-		}
+			return (malloc_error());
 		ft_strlcpy (cmd, argv, len + 1);
 	}
 	else
 	{
 		cmd = ft_strdup(argv);
 		if (!cmd)
-		{
-			perror ("Malloc in get only cmd");
-			return (NULL);
-		}
+			return (malloc_error());
 	}
 	return (cmd);
 }

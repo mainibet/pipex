@@ -54,3 +54,9 @@ int	fork_error(int fd_in, int *pipefd)
 	close_fd(pipefd[1]);
 	return (-1);
 }
+
+char	*malloc_error(void)
+{
+	perror("Malloc error");
+	return (NULL);
+}
