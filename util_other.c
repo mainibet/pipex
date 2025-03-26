@@ -36,12 +36,7 @@ int	wait_child(pid_t pid, int *status)
 {
 	if (waitpid(pid, status, 0) == -1)
 	{
-		perror ("Error waiting for child");
-		return (-1);
-	}
-	if (WIFEXITED(*status) && WEXITSTATUS(*status) != 0)
-	{
-		perror ("Child failed");
+		perror ("Error waiting for child or just good if was grep1");
 		return (-1);
 	}
 	return (0);

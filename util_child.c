@@ -85,6 +85,7 @@ void	child_process(t_pipe_data *data, t_initial_fd *fd, int child_num)
 	free(nargv);
 	close_fd(dup.input_dup);
 	close_fd(dup.output_dup);
+	sleep(5); // Agrega un retardo de 1 segundo
 	exit(1);
 }
 

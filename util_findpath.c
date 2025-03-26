@@ -12,60 +12,6 @@
 
 #include "pipex.h"
 
-// char *find_path(char *argv, char **envp)
-
-// {
-//     char *file_path;
-//     char **dir;
-//     char *path;
-//     char *each_path;
-//     int i;
-
-//     // path = get_path_env(envp);
-//     // if (!path)
-//     // {
-//     //     perror("PATH env not found");
-//     //     return (NULL);
-//     // }
-
-//     // dir = ft_split(path, ':');
-
-//     // if (!dir)
-
-//     //     return (NULL);
-//     // i = 0;
-//     // while (dir[i])
-//     {
-//     // each_path = ft_strjoin(dir[i], "/");
-//     // if (!each_path)
-//     // {
-//     //     free (dir[i]);
-//     //     return (NULL);
-//     // }
-//     // file_path = ft_strjoin(each_path, argv);
-//     // free (each_path);
-//     // if (!file_path)
-//     // {
-//     //     free(dir[i]);
-//     //     return (NULL);
-//     // }
-//     // if (access (file_path, F_OK) == 0)
-//     // {
-//     //     while (dir[i])
-//     //     {
-//     //         free(dir[i]);
-//     //         i++;
-//     //     }
-//     //     free (dir);
-//     //     return (file_path);
-//     // }
-//     //     free (dir[i]);
-//     //     free (file_path);
-//     //     i++;
-//     // }
-//     free (dir);
-//     return (NULL);
-// }
 //get the array of paths from PATH
 static char	**get_path(char **envp)
 {
@@ -84,7 +30,6 @@ static char	**get_path(char **envp)
 		free(path);
 		return (NULL);
 	}
-	//free(path);//new
 	return (dir);
 }
 
@@ -130,6 +75,17 @@ static char	*check_path(char **dir, char *file_path, int i)
 	return (NULL);
 }
 
+static char	*free_prev_dir(char **dir, int i)
+{
+	while (dir[i])
+	{
+		free(dir[i]);
+		i++;
+	}
+	free(dir);
+	return (NULL);
+}
+
 char	*find_path(char *argv, char **envp)
 {
 	char	*file_path;
@@ -145,15 +101,7 @@ char	*find_path(char *argv, char **envp)
 	{
 		file_path = create_path(dir[i], argv);
 		if (!file_path)
-		{
-			while (dir[i])
-			{
-				free(dir[i]);
-				i++;
-			}
-			free(dir);
-			return (NULL);
-		}
+			free_prev_dir(dir, i);
 		final_path = check_path(dir, file_path, i);
 		if (final_path)
 			return (final_path);
@@ -161,7 +109,6 @@ char	*find_path(char *argv, char **envp)
 		free (dir[i]);
 		i++;
 	}
-	//free(dir[i]);
 	free(dir);
 	return (NULL);
 }

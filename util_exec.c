@@ -37,7 +37,8 @@ char	**dup_new_cmd(char **cmd)
 	i = 0;
 	while (cmd[len])
 		len++;
-	if (!(new_arg = malloc(sizeof(char *) * (len + 1))))
+	new_arg = malloc(sizeof(char *) * (len + 1));
+	if (!new_arg)
 	{
 		perror ("malloc in exec_arg");
 		return (NULL);
