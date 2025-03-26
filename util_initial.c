@@ -106,7 +106,3 @@ int	ini_check(int argc, char **argv, char **envp)
 	}
 	return (0);
 }
-
-
-
-
