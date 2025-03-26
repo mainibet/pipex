@@ -52,58 +52,6 @@ char	*get_only_cmd(char *argv)
 	return (cmd);
 }
 
-char	*find_path(char *argv, char **envp)
-{
-	char	*file_path;
-	char	**dir;
-	char	*path;
-	char	*each_path;
-	int		i;
-
-	path = get_path_env(envp);
-	if (!path)
-	{
-		perror("PATH env not found");
-		return (NULL);
-	}
-	dir = ft_split(path, ':');
-	if (!dir)
-		return (NULL);
-
-	i = 0;
-	while (dir[i])
-	{
-		each_path = ft_strjoin(dir[i], "/");
-		if (!each_path)
-		{
-			free (dir[i]);
-			return (NULL);
-		}
-		file_path = ft_strjoin(each_path, argv);
-		free (each_path);
-		if (!file_path)
-		{
-			free(dir[i]);
-			return (NULL);
-		}
-		if (access (file_path, F_OK) == 0)
-		{
-			while (dir[i])
-			{
-				free(dir[i]);
-				i++;
-			}
-			free (dir);
-			return (file_path);
-		}
-		free (dir[i]);
-		free (file_path);
-		i++;
-	}
-	free (dir);
-	return (NULL);
-}
-
 void	free_name_path(char *cmd_name, char *cmd_path)
 {
 	free (cmd_path);

@@ -12,60 +12,60 @@
 
 #include "pipex.h"
 
-char *find_path(char *argv, char **envp)
+// char *find_path(char *argv, char **envp)
 
-{
-    char *file_path;
-    char **dir;
-    char *path;
-    char *each_path;
-    int i;
+// {
+//     char *file_path;
+//     char **dir;
+//     char *path;
+//     char *each_path;
+//     int i;
 
-    // path = get_path_env(envp);
-    // if (!path)
-    // {
-    //     perror("PATH env not found");
-    //     return (NULL);
-    // }
+//     // path = get_path_env(envp);
+//     // if (!path)
+//     // {
+//     //     perror("PATH env not found");
+//     //     return (NULL);
+//     // }
 
-    // dir = ft_split(path, ':');
+//     // dir = ft_split(path, ':');
 
-    // if (!dir)
+//     // if (!dir)
 
-    //     return (NULL);
-    i = 0;
-    while (dir[i])
-    {
-    // each_path = ft_strjoin(dir[i], "/");
-    // if (!each_path)
-    // {
-    //     free (dir[i]);
-    //     return (NULL);
-    // }
-    // file_path = ft_strjoin(each_path, argv);
-    // free (each_path);
-    // if (!file_path)
-    // {
-    //     free(dir[i]);
-    //     return (NULL);
-    // }
-    // if (access (file_path, F_OK) == 0)
-    // {
-    //     while (dir[i])
-    //     {
-    //         free(dir[i]);
-    //         i++;
-    //     }
-    //     free (dir);
-    //     return (file_path);
-    // }
-        free (dir[i]);
-        free (file_path);
-        i++;
-    }
-    free (dir);
-    return (NULL);
-}
+//     //     return (NULL);
+//     // i = 0;
+//     // while (dir[i])
+//     {
+//     // each_path = ft_strjoin(dir[i], "/");
+//     // if (!each_path)
+//     // {
+//     //     free (dir[i]);
+//     //     return (NULL);
+//     // }
+//     // file_path = ft_strjoin(each_path, argv);
+//     // free (each_path);
+//     // if (!file_path)
+//     // {
+//     //     free(dir[i]);
+//     //     return (NULL);
+//     // }
+//     // if (access (file_path, F_OK) == 0)
+//     // {
+//     //     while (dir[i])
+//     //     {
+//     //         free(dir[i]);
+//     //         i++;
+//     //     }
+//     //     free (dir);
+//     //     return (file_path);
+//     // }
+//     //     free (dir[i]);
+//     //     free (file_path);
+//     //     i++;
+//     // }
+//     free (dir);
+//     return (NULL);
+// }
 //get the array of paths from PATH
 static char	**get_path(char **envp)
 {
@@ -84,31 +84,38 @@ static char	**get_path(char **envp)
 		free(path);
 		return (NULL);
 	}
-	free(path);
+	//free(path);//new
 	return (dir);
 }
+
 //create and check path
-static char	*create_path(char *dir, char *argv, char **envp)
+
+//static char	*create_path(char *dir, char *argv)
+static char	*create_path(char *dir, char *argv)
 {
 	char	*each_path;
 	char	*file_path;
 
-	each_path = ft_strjoin(dir[i], "/");
+	each_path = ft_strjoin(dir, "/");
 	if (!each_path)
 	{
-		free (dir[i]);
+		free (dir);
 		return (NULL);
 	}
 	file_path = ft_strjoin(each_path, argv);
 	free (each_path);
 	if (!file_path)
 	{
-		free(dir[i]);
+		free(dir);
 		return (NULL);
 	}
+	return (file_path);
 }
 
-static char	check_path(char **fir, char *file_path, int i)
+//check he path with access and if found it
+//it will be return 
+
+static char	*check_path(char **dir, char *file_path, int i)
 {
 	if (access (file_path, F_OK) == 0)
 	{
@@ -124,12 +131,10 @@ static char	check_path(char **fir, char *file_path, int i)
 }
 
 char	*find_path(char *argv, char **envp)
-
 {
 	char	*file_path;
 	char	**dir;
 	char	*final_path;
-	char	*each_path;
 	int		i;
 
 	dir = get_path(envp);
@@ -153,15 +158,10 @@ char	*find_path(char *argv, char **envp)
 		if (final_path)
 			return (final_path);
 		free(file_path);
+		free (dir[i]);
 		i++;
 	}
-	while (dir[i])
-	{
-		free(dir[i]);
-		i++;
-	}
+	//free(dir[i]);
 	free(dir);
 	return (NULL);
 }
-
-//CHECK THIS FINAL VS ORIGINAL
