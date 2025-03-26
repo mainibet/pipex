@@ -117,5 +117,3 @@ void	execution(char	**nargv, char **const envp)
 	free_nargv(nargv);
 	exit (EXIT_FAILURE);
 }
-
-
