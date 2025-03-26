@@ -32,15 +32,6 @@ void	free_memory(char **narg, int j)
 	free (narg);
 }
 
-int	wait_child(pid_t pid, int *status)
-{
-	if (waitpid(pid, status, 0) == -1)
-	{
-		perror ("Error waiting for child or just good if was grep1");
-		return (-1);
-	}
-	return (0);
-}
 
 int	fork_error(int fd_in, int *pipefd)
 {

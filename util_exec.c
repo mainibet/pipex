@@ -39,13 +39,11 @@ char	**dup_new_cmd(char **cmd)
 		len++;
 	new_arg = malloc(sizeof(char *) * (len + 1));
 	if (!new_arg)
-	{
-		perror ("malloc in exec_arg");
-		return (NULL);
-	}
+		return ((char **)malloc_error());
 	while (i < len)
 	{
-		if (!(new_arg[i] = ft_strdup(cmd[i])))
+		new_arg[i] = ft_strdup(cmd[i]);
+		if (!new_arg[i])
 		{
 			perror ("ft_strdup failed in the preocess of new_arg");
 			free_memory(new_arg, i);

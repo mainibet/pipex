@@ -12,7 +12,7 @@
 
 #include "pipex.h"
 
-static void	child1(t_pipe_data *data)
+void	child1(t_pipe_data *data)
 {
 	t_initial_fd	fd;
 	int				child_num;
@@ -23,7 +23,7 @@ static void	child1(t_pipe_data *data)
 	child_process(data, &fd, child_num);
 }
 
-static void	child2(t_pipe_data *data)
+void	child2(t_pipe_data *data)
 {
 	t_initial_fd	fd;
 	int				child_num;
@@ -47,38 +47,21 @@ static int	parent(struct s_pipe_data *data)
 {
 	pid_t	pid1;
 	pid_t	pid2;
-	int		status1;
-	int		status2;
+	int		status;
+	int		result;
 
-	pid1 = fork();
-	if (pid1 == -1)
-	{
-		perror ("Fork failed for child1");
-		return (fork_error(data->fd_in, data->pipefd));
-	}
-	else if (pid1 == 0)
-		child1(data);
-	pid2 = fork();
-	if (pid2 == -1)
-	{
-		perror ("Fork failed for child2");
-		if (wait_child(pid1, &status1) == -1)
-			perror("Error waiting child1");
-		return (fork_error(data->fd_in, data->pipefd));
-	}
-	else if (pid2 == 0)
-		child2(data);
+	result = fork_handle(&pid1, data, 1);
+	if (check_fork(result, 0, &status))
+		return (result);
+	result = fork_handle(&pid2, data, 2);
+	if (check_fork(result, pid1, &status))
+		return (result);
 	close_fd(data -> fd_in);
 	close_fd(data -> pipefd[0]);
 	close_fd(data -> pipefd[1]);
-	if (wait_child(pid1, &status1) == -1)
+	if (wait_child(pid1, &status) == -1 || wait_child(pid2, &status) == -1)
 	{
-		perror ("error waiting child1");
-		return (-1);
-	}
-	if (wait_child(pid2, &status2) == -1)
-	{
-		perror ("Error waiting child2");
+		perror ("error waiting child");
 		return (-1);
 	}
 	return (0);

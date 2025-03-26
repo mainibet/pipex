@@ -41,7 +41,8 @@ typedef struct s_fd_dup
 	int	output_dup;
 }t_fd_dup;
 
-
+void		child1(t_pipe_data *data);
+void		child2(t_pipe_data *data);
 char		*get_path_env(char **envp);
 char		*get_only_cmd(char *argv);
 char		*find_path(char *argv, char **envp);
@@ -57,10 +58,12 @@ char		**exec_arg(int argc, char **argv, int child_num);
 void		execution(char	**nargv, char **const envp);
 int			close_fd(int fd);
 void		free_memory(char **narg, int j);
-int			wait_child(pid_t pid, int *status);
 int			fork_error(int fd_in, int *pipefd);
 char		*malloc_error(void);
 void		free_name_path(char *cmd_name, char *cmd_path);
+int			wait_child(pid_t pid, int *status);
+int			fork_handle(pid_t *pid, t_pipe_data *data, int child_num);
+int			check_fork(int result, pid_t pid1, int *status);
 
 #endif
 

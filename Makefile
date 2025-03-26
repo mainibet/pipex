@@ -19,7 +19,7 @@ LIBFT_LIB = $(LIBFT_DIR)/libft.a
 
 NAME = pipex
 
-SRC = pipex.c util_initial.c util_child.c util_exec.c util_other.c util_findpath.c
+SRC = pipex.c util_initial.c util_child.c util_exec.c util_other.c util_findpath.c util_parent.c
 
 OBJ = $(SRC:.c=.o)
 
