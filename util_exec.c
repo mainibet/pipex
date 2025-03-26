@@ -12,18 +12,6 @@
 
 #include "pipex.h"
 
-// char	**new_arr_cmd(char *argv)
-// {
-// 	char	**cmd;
-// 	size_t	len;
-
-// 	len = 0;
-	// cmd = ft_split(argv, ' ');
-	// if (!cmd)
-	// 	return (NULL);
-// 	return (cmd);
-// }
-
 char	**new_arr_cmd(t_pipe_data *data, int child_num)
 {
 	char	*cmd_arg;
@@ -82,25 +70,8 @@ char	**dup_new_cmd(char **cmd)
 
 char	**exec_arg(t_pipe_data *data, int child_num)
 {
-	// char	**cmd;
 	char	**new_arg;
-	// char	*cmd_arg;
 
-	// if (child_num == 1)
-	// 	cmd_arg = argv[2];
-	// else if (child_num == 2)
-	// 	cmd_arg = argv[argc - 2];
-	// else
-	// 	return (NULL);
-	// if (ft_strchr(cmd_arg, ' '))
-	// {
-	// 	cmd = new_arr_cmd(cmd_arg);
-	// 	if (!cmd)
-	// 	{
-	// 		perror("new_arr_cmd in exec_arg");
-	// 		return (NULL);
-	// 	}
-		// new_arg = dup_new_cmd(cmd);
 	new_arg = new_arr_cmd(data, child_num);
 	if (!new_arg)
 		return (NULL);
@@ -111,14 +82,6 @@ char	**exec_arg(t_pipe_data *data, int child_num)
 		free(new_arg);
 		return (NULL);
 	}
-	// else
-	// {
-	// 	new_arg = malloc (sizeof(char *) * (2));
-	// 	if (!new_arg)
-	// 		return (malloc_error());
-	// 	new_arg[0] = cmd_arg;
-	// 	new_arg[1] = NULL;
-	// }
 	return (new_arg);
 }
 
