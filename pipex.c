@@ -12,7 +12,7 @@
 
 #include "pipex.h"
 
-void	child1(t_pipe_data *data)
+static void	child1(t_pipe_data *data)
 {
 	t_initial_fd	fd;
 	int				child_num;
@@ -23,7 +23,7 @@ void	child1(t_pipe_data *data)
 	child_process(data, &fd, child_num);
 }
 
-void	child2(t_pipe_data *data)
+static void	child2(t_pipe_data *data)
 {
 	t_initial_fd	fd;
 	int				child_num;
@@ -43,7 +43,7 @@ void	child2(t_pipe_data *data)
 	child_process(data, &fd, child_num);
 }
 
-int	parent(struct s_pipe_data *data)
+static int	parent(struct s_pipe_data *data)
 {
 	pid_t	pid1;
 	pid_t	pid2;
@@ -84,7 +84,7 @@ int	parent(struct s_pipe_data *data)
 	return (0);
 }
 
-int	setup_pipe(int pipefd[2], int fd_in)
+static int	setup_pipe(int pipefd[2], int fd_in)
 {
 	if (pipe(pipefd) == -1)
 	{

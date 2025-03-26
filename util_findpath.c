@@ -12,7 +12,6 @@
 
 #include "pipex.h"
 
-//get the array of paths from PATH
 static char	**get_path(char **envp)
 {
 	char	*path;
@@ -33,9 +32,6 @@ static char	**get_path(char **envp)
 	return (dir);
 }
 
-//create and check path
-
-//static char	*create_path(char *dir, char *argv)
 static char	*create_path(char *dir, char *argv)
 {
 	char	*each_path;
@@ -56,9 +52,6 @@ static char	*create_path(char *dir, char *argv)
 	}
 	return (file_path);
 }
-
-//check he path with access and if found it
-//it will be return 
 
 static char	*check_path(char **dir, char *file_path, int i)
 {
