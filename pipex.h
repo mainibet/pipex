@@ -19,7 +19,6 @@
 # include <stdio.h> 
 # include <sys/wait.h>
 
-
 typedef struct s_pipe_data
 {
 	int		argc;
@@ -66,4 +65,3 @@ int			fork_handle(pid_t *pid, t_pipe_data *data, int child_num);
 int			check_fork(int result, pid_t pid1, int *status);
 
 #endif
-
