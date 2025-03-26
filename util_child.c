@@ -72,8 +72,7 @@ void	child_process(t_pipe_data *data, t_initial_fd *fd, int child_num)
 
 	if (setup_redir(fd -> input_fd, fd -> output_fd, &dup) != 0)
 		exit(1);
-	//nargv = exec_arg(data -> argc, data -> argv, child_num);
-	nargv = exec_arg(data, child_num);//new
+	nargv = exec_arg(data, child_num);
 	if (!nargv)
 	{
 		perror ("nargv before execution");
@@ -88,4 +87,3 @@ void	child_process(t_pipe_data *data, t_initial_fd *fd, int child_num)
 	close_fd(dup.output_dup);
 	exit(1);
 }
-
