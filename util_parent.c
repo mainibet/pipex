@@ -25,7 +25,6 @@ int	wait_child(pid_t pid, int *status)
 int	fork_handle(pid_t *pid, t_pipe_data *data, int child_num)
 {
 	*pid = fork();
-
 	if (*pid == -1)
 	{
 		perror ("Fork failed");
@@ -57,4 +56,3 @@ int	check_fork(int result, pid_t pid1, int *status)
 	}
 	return (0);
 }
-

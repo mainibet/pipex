@@ -32,7 +32,6 @@ void	free_memory(char **narg, int j)
 	free (narg);
 }
 
-
 int	fork_error(int fd_in, int *pipefd)
 {
 	close_fd(fd_in);
