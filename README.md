@@ -27,7 +27,7 @@ It also handles command path resolution using the `PATH` environment variable.
 
 The project utilizes the **libft** library, a custom C library with various utility functions, which is included as a submodule.
 
-## Features
+## 🚀 Features
 
 - **Pipe Implementation**: Connects the standard output of the first command to the standard input of the second command.
 - **Input Redirection**: Reads input for the first command from a specified input file.
@@ -37,7 +37,9 @@ The project utilizes the **libft** library, a custom C library with various util
 - **Error Handling**: Includes robust error checking for file opening, piping, forking, and command execution, providing informative error messages.
 - **Process Management**: Manages child processes using `fork()` and `waitpid()`.
 
-## Getting Started
+## 💡 Usage
+
+**Getting Started**
 
 To get a local copy of Pipex up and running, follow these simple steps.
 
@@ -47,7 +49,7 @@ To get a local copy of Pipex up and running, follow these simple steps.
 * `make` utility
 * `git` (to clone the repository)
 
-### Installation
+### ⚙️ Installation
 
 **Clone the repo**:
 
@@ -67,7 +69,6 @@ The pipex program expects exactly four arguments: an input file, the first comma
 ```
 ./pipex <infile> <cmd1> <cmd2> <outfile>
 ```
-#### Usage
 **Arguments**:
 
 - `<infile>`: The path to the input file for cmd1.
@@ -88,7 +89,7 @@ The program will print error messages to stderr if:
 - A command is not found or is not executable.
 - System calls like pipe(), fork(), dup2(), or execve() fail.
 
-## Building the Project
+### Building the Project
 
 The project uses a Makefile for compilation and management.
 
@@ -124,7 +125,7 @@ Any contributions you make are greatly appreciated :)
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request.
 
-##  Autor
+## 👤 Autor
 Alicia Betancourt ([mainibet](https://github.com/mainibet))
 
 ## Acknowledgments
