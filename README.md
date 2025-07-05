@@ -110,6 +110,7 @@ The libft library, located in the libft subdirectory, is automatically built by 
 ├── pipex.h
 ├── libft/
 │   └── (libft files and directories)
+├── testing_files/
 ├── util_child.c
 ├── util_exec.c
 ├── util_findpath.c
