@@ -18,6 +18,8 @@ piping its output to the second command, which then writes its standard output t
 - [Contact](#contact)
 - [Acknowledgments](#acknowledgments)
 
+---
+
 ## About the Project
 
 This project implements a simplified version of the shell's piping mechanism. It demonstrates the use of fundamental Unix system calls such as
@@ -26,6 +28,8 @@ The program is robust, including error handling for file operations, command exe
 It also handles command path resolution using the `PATH` environment variable.
 
 The project utilizes the **libft** library, a custom C library with various utility functions, which is included as a submodule.
+
+---
 
 ## 🚀 Features
 
@@ -36,6 +40,8 @@ The project utilizes the **libft** library, a custom C library with various util
 - **Path Resolution**: Automatically finds the full path of commands using the `PATH` environment variable.
 - **Error Handling**: Includes robust error checking for file opening, piping, forking, and command execution, providing informative error messages.
 - **Process Management**: Manages child processes using `fork()` and `waitpid()`.
+
+---
 
 ## 💡 Usage
 
@@ -103,6 +109,8 @@ The project uses a Makefile for compilation and management.
 
 The libft library, located in the libft subdirectory, is automatically built by the pipex Makefile if it hasn't been built already.
 
+---
+
 ## 🗂️ File Structure
 ```
 .
@@ -127,6 +135,8 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 ## 👤 Autor
 Alicia Betancourt ([mainibet](https://github.com/mainibet))
+
+---
 
 ## Acknowledgments
 This project was developed as part of the 42 Berlin curriculum.
