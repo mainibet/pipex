@@ -81,7 +81,8 @@ To replicate cat infile | grep "hello" > outfile:
 
 **Error Handling**:
 
-- The program will print error messages to stderr if:
+The program will print error messages to stderr if:
+
 - The number of arguments is incorrect.
 - The input file cannot be opened or read.
 - A command is not found or is not executable.
