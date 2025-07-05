@@ -41,13 +41,9 @@ The project utilizes the **libft** library, a custom C library with various util
 
 To get a local copy of Pipex up and running, follow these simple steps.
 
-## Getting Started
-
-To get a local copy of Pipex up and running, follow these simple steps.
-
 ### Prerequisites
 
-* A C compiler (e.g., `gcc`, `clang`)
+* C compiler (e.g., `gcc`, `clang`)
 * `make` utility
 * `git` (to clone the repository)
 
@@ -71,6 +67,7 @@ The pipex program expects exactly four arguments: an input file, the first comma
 ```
 ./pipex <infile> <cmd1> <cmd2> <outfile>
 ```
+#### Usage
 **Arguments**:
 
 - `<infile>`: The path to the input file for cmd1.
@@ -82,7 +79,7 @@ The pipex program expects exactly four arguments: an input file, the first comma
 
 To replicate cat infile | grep "hello" > outfile:
 
-### Error Handling:
+**Error Handling**:
 
 - The program will print error messages to stderr if:
 - The number of arguments is incorrect.
@@ -121,7 +118,7 @@ The libft library, located in the libft subdirectory, is automatically built by 
 
 ```
 ## Contributing
-Any contributions you make are greatly appreciated.
+Any contributions you make are greatly appreciated :)
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request.
 
